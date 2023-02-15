@@ -1,0 +1,8 @@
+# Binaries
+bin/
+
+# Work Dir
+tfarmd-work-dir/
+
+# Environment
+.env
