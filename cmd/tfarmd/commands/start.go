@@ -80,7 +80,16 @@ func Start() error {
 	f := frpc.New(frpcBinPath, workDir)
 
 	h := handlers.NewMuxHandler(o, f)
-	a := api.NewServer(h, port)
+	tls := &api.TLSFiles{
+		CertFile: path.Join(workDir, "tls", "server.crt"),
+		KeyFile:  path.Join(workDir, "tls", "server.key"),
+		CAFile:   path.Join(workDir, "tls", "ca.crt"),
+	}
+
+	a, err := api.NewServer(h, port, tls)
+	if err != nil {
+		return fmt.Errorf("error starting api server: %s", err)
+	}
 	a.Start()
 
 	o.WaitForLogin()

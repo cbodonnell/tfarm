@@ -1,7 +1,9 @@
 package commands
 
 import (
+	"log"
 	"os"
+	"path"
 
 	"github.com/cbodonnell/tfarm/pkg/api"
 	"github.com/spf13/cobra"
@@ -28,9 +30,33 @@ func InitAndExecute() {
 	if endpoint == "" {
 		endpoint = api.DefaultEndpoint
 	}
-	client = api.NewClient(endpoint)
+
+	// TODO: make this configurable through a config file (like ~/.tfarm/tls/)
+	configDir := os.Getenv("TFARM_CONFIG_DIR")
+	if configDir == "" {
+		// get the user's home directory
+		home, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatalf("error getting user's home directory: %s", err)
+		}
+
+		configDir = path.Join(home, ".tfarm")
+	}
+
+	tlsFiles := &api.TLSFiles{
+		CertFile: path.Join(configDir, "tls", "client.crt"),
+		KeyFile:  path.Join(configDir, "tls", "client.key"),
+		CAFile:   path.Join(configDir, "tls", "ca.crt"),
+	}
+
+	newClient, err := api.NewClient(endpoint, tlsFiles)
+	if err != nil {
+		log.Fatalf("error creating API client: %s", err)
+	}
+
+	client = newClient
 
 	if err := rootCmd.Execute(); err != nil {
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }

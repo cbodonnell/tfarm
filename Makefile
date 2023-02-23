@@ -35,3 +35,7 @@ start-tfarmd-dev:
 		--frps-server-port=30070 \
 		--frps-token=${TFARMD_FRPS_TOKEN} \
 		--frpc-log-level ${TFARMD_LOG_LEVEL}
+
+tfarmd-certs:
+	TFARMD_WORK_DIR=${TFARMD_WORK_DIR} \
+	./bin/tfarmd certs
