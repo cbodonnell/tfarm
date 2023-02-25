@@ -6,14 +6,14 @@ import (
 	"path"
 
 	"github.com/cbodonnell/tfarm/pkg/api"
+	"github.com/cbodonnell/tfarm/pkg/version"
 	"github.com/spf13/cobra"
 )
 
-var version = "dev"
 var rootCmd = &cobra.Command{
 	Use:     "tfarm",
 	Short:   "tfarm - a CLI to interact with the tfarmd daemon",
-	Version: version,
+	Version: version.Version,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			cmd.Help()
@@ -24,6 +24,7 @@ var rootCmd = &cobra.Command{
 
 // client is the API client used by all commands
 var client *api.APIClient
+var configDir string
 
 func InitAndExecute() {
 	endpoint := os.Getenv("TFARM_API_ENDPOINT")
@@ -32,7 +33,7 @@ func InitAndExecute() {
 	}
 
 	// TODO: make this configurable through a config file (like ~/.tfarm/tls/)
-	configDir := os.Getenv("TFARM_CONFIG_DIR")
+	configDir = os.Getenv("TFARM_CONFIG_DIR")
 	if configDir == "" {
 		// get the user's home directory
 		home, err := os.UserHomeDir()
@@ -43,13 +44,7 @@ func InitAndExecute() {
 		configDir = path.Join(home, ".tfarm")
 	}
 
-	tlsFiles := &api.TLSFiles{
-		CertFile: path.Join(configDir, "tls", "client.crt"),
-		KeyFile:  path.Join(configDir, "tls", "client.key"),
-		CAFile:   path.Join(configDir, "tls", "ca.crt"),
-	}
-
-	newClient, err := api.NewClient(endpoint, tlsFiles)
+	newClient, err := api.NewClient(endpoint, configDir)
 	if err != nil {
 		log.Fatalf("error creating API client: %s", err)
 	}

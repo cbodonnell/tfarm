@@ -10,12 +10,12 @@ clean:
 
 tfarmd:
 	go build \
-	-ldflags="-X 'github.com/cbodonnell/tfarm/cmd/tfarmd/commands.version=${VERSION}'" \
+	-ldflags="-X 'github.com/cbodonnell/tfarm/pkg/version.Version=${VERSION}'" \
 	-o ./bin/tfarmd ./cmd/tfarmd/main.go
 
 tfarm:
 	go build \
-	-ldflags="-X 'github.com/cbodonnell/tfarm/cmd/tfarm/commands.version=${VERSION}'" \
+	-ldflags="-X 'github.com/cbodonnell/tfarm/pkg/version.Version=${VERSION}'" \
 	-o ./bin/tfarm ./cmd/tfarm/main.go
 
 start-tfarmd:

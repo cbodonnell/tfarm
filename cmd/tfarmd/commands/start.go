@@ -10,6 +10,7 @@ import (
 	"github.com/cbodonnell/tfarm/pkg/auth"
 	"github.com/cbodonnell/tfarm/pkg/frpc"
 	"github.com/cbodonnell/tfarm/pkg/handlers"
+	"github.com/cbodonnell/tfarm/pkg/version"
 	"github.com/fatedier/frp/pkg/config"
 	"github.com/spf13/cobra"
 )
@@ -42,7 +43,7 @@ func init() {
 }
 
 func Start() error {
-	log.Printf("starting tfarmd version %s", version)
+	log.Printf("starting tfarmd version %s", version.Version)
 
 	frpcBinPath := os.Getenv("TFARMD_FRPC_BIN_PATH")
 	if frpcBinPath == "" {

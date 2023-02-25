@@ -123,8 +123,9 @@ func CertsClient(name string) error {
 		return fmt.Errorf("error getting absolute path of client certificate: %s", err)
 	}
 
-	fmt.Println("Client certificate written to:", path.Join(absPath, fmt.Sprintf("%s.crt", name)))
-	fmt.Println("Client key written to:", path.Join(absPath, fmt.Sprintf("%s.key", name)))
+	fmt.Println("Client certificate and key written to:")
+	fmt.Println("  ", path.Join(absPath, fmt.Sprintf("%s.crt", name)))
+	fmt.Println("  ", path.Join(absPath, fmt.Sprintf("%s.key", name)))
 
 	return nil
 }

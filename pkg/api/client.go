@@ -8,11 +8,22 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"path"
+
+	"github.com/cbodonnell/tfarm/pkg/version"
 )
 
 type APIClient struct {
 	endpoint   string
 	httpClient *http.Client
+	configDir  string
+}
+
+type APIInfo struct {
+	ClientVersion  string `json:"client_version"`
+	ServerVersion  string `json:"server_version"`
+	ServerEndpoint string `json:"server_endpoint"`
+	ConfigDir      string `json:"config_dir"`
 }
 
 type APIResponse struct {
@@ -43,7 +54,13 @@ type DeleteRequest struct {
 	Name string `json:"name"`
 }
 
-func NewClient(endpoint string, tlsFiles *TLSFiles) (*APIClient, error) {
+func NewClient(endpoint string, configDir string) (*APIClient, error) {
+	tlsFiles := &TLSFiles{
+		CertFile: path.Join(configDir, "tls", "client.crt"),
+		KeyFile:  path.Join(configDir, "tls", "client.key"),
+		CAFile:   path.Join(configDir, "tls", "ca.crt"),
+	}
+
 	// Load the server certificate and key
 	cert, err := tls.LoadX509KeyPair(tlsFiles.CertFile, tlsFiles.KeyFile)
 	if err != nil {
@@ -74,6 +91,16 @@ func NewClient(endpoint string, tlsFiles *TLSFiles) (*APIClient, error) {
 	return &APIClient{
 		endpoint:   endpoint,
 		httpClient: httpClient,
+		configDir:  configDir,
+	}, nil
+}
+
+func (c *APIClient) Info() (*APIInfo, error) {
+	return &APIInfo{
+		ClientVersion:  version.Version,
+		ServerVersion:  "TODO",
+		ServerEndpoint: c.endpoint,
+		ConfigDir:      c.configDir,
 	}, nil
 }
 

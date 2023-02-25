@@ -171,7 +171,8 @@ func CertsRegenerate() error {
 		return fmt.Errorf("error getting absolute path of tls directory: %s", err)
 	}
 
-	fmt.Println("Certificates written to:", absPath)
+	fmt.Println("Certificates written to:")
+	fmt.Println("  ", absPath)
 
 	return nil
 }
