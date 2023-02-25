@@ -165,7 +165,6 @@ func CertsRegenerate() error {
 	pem.Encode(keyFile, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(clientKey)})
 	keyFile.Close()
 
-	// get absolute path of path.Join(workDir, "tls")
 	absPath, err := filepath.Abs(path.Join(workDir, "tls"))
 	if err != nil {
 		return fmt.Errorf("error getting absolute path of tls directory: %s", err)

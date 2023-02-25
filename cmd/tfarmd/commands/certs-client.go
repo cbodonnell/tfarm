@@ -97,35 +97,34 @@ func CertsClient(name string) error {
 	}
 
 	// make sure the tls/clients directory exists
-	err = os.MkdirAll(path.Join(workDir, "tls", "clients"), 0755)
+	err = os.MkdirAll(path.Join(workDir, "tls", "clients", name), 0755)
 	if err != nil {
 		return fmt.Errorf("error creating clients directory: %s", err)
 	}
 
 	// Write the client certificate and key to files
-	certFile, err := os.Create(path.Join(workDir, "tls", "clients", fmt.Sprintf("%s.crt", name)))
+	certFile, err := os.Create(path.Join(workDir, "tls", "clients", name, "client.crt"))
 	if err != nil {
 		return fmt.Errorf("error creating client certificate file: %s", err)
 	}
 	pem.Encode(certFile, &pem.Block{Type: "CERTIFICATE", Bytes: clientCert})
 	certFile.Close()
 
-	keyFile, err := os.Create(path.Join(workDir, "tls", "clients", fmt.Sprintf("%s.key", name)))
+	keyFile, err := os.Create(path.Join(workDir, "tls", "clients", name, "client.key"))
 	if err != nil {
 		return fmt.Errorf("error creating client key file: %s", err)
 	}
 	pem.Encode(keyFile, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(clientKey)})
 	keyFile.Close()
 
-	// get absolute path of path.Join(workDir, "tls", "clients", fmt.Sprintf("%s.crt", name))
-	absPath, err := filepath.Abs(path.Join(workDir, "tls", "clients"))
+	absPath, err := filepath.Abs(path.Join(workDir, "tls", "clients", name))
 	if err != nil {
 		return fmt.Errorf("error getting absolute path of client certificate: %s", err)
 	}
 
 	fmt.Println("Client certificate and key written to:")
-	fmt.Println("  ", path.Join(absPath, fmt.Sprintf("%s.crt", name)))
-	fmt.Println("  ", path.Join(absPath, fmt.Sprintf("%s.key", name)))
+	fmt.Println("  ", path.Join(absPath, "client.crt"))
+	fmt.Println("  ", path.Join(absPath, "client.key"))
 
 	return nil
 }
