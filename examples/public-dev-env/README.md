@@ -1,6 +1,6 @@
 # Public Dev Environment
 
-This is an example using tunnel.farm to create a public development environment.
+This is an example using tfarm to create a public development environment.
 
 The development environment is a simple web server that proxies requests to local services.
 

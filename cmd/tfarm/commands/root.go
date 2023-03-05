@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/cbodonnell/tfarm/cmd/tfarm/commands/ranch"
 	"github.com/cbodonnell/tfarm/cmd/tfarm/commands/server"
 	"github.com/cbodonnell/tfarm/pkg/api"
 	"github.com/cbodonnell/tfarm/pkg/version"
@@ -35,6 +36,9 @@ func RootCmd() *cobra.Command {
 
 	// add the server subcommand
 	rootCmd.AddCommand(server.RootCmd())
+
+	// add the ranch subcommand
+	rootCmd.AddCommand(ranch.RootCmd())
 
 	return rootCmd
 }
