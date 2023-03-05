@@ -8,34 +8,29 @@ endif
 clean:
 	rm -rf ./bin/*
 
-tfarmd:
-	go build \
-	-ldflags="-X 'github.com/cbodonnell/tfarm/pkg/version.Version=${VERSION}'" \
-	-o ./bin/tfarmd ./cmd/tfarmd/main.go
-
 tfarm:
 	go build \
 	-ldflags="-X 'github.com/cbodonnell/tfarm/pkg/version.Version=${VERSION}'" \
 	-o ./bin/tfarm ./cmd/tfarm/main.go
 
-start-tfarmd:
+tfarm-server-start:
 	TFARMD_FRPC_BIN_PATH=${TFARMD_FRPC_BIN_PATH} \
 	TFARMD_WORK_DIR=${TFARMD_WORK_DIR} \
 	TFARMD_LOG_LEVEL=${TFARMD_LOG_LEVEL} \
-	./bin/tfarmd start \
+	./bin/tfarm server start \
 		--frpc-log-level ${TFARMD_LOG_LEVEL}
 
-start-tfarmd-dev:
+tfarm-server-start-dev:
 	TFARMD_FRPC_BIN_PATH=${TFARMD_FRPC_BIN_PATH} \
 	TFARMD_WORK_DIR=${TFARMD_DEV_WORK_DIR} \
 	TFARMD_LOG_LEVEL=${TFARMD_LOG_LEVEL} \
 	TFARMD_FRPS_TOKEN=${TFARMD_FRPS_TOKEN} \
-	./bin/tfarmd start \
+	./bin/tfarm server start \
 		--frps-server-addr=ranch.tunnel.farm \
 		--frps-server-port=30070 \
 		--frps-token=${TFARMD_FRPS_TOKEN} \
 		--frpc-log-level ${TFARMD_LOG_LEVEL}
 
-tfarmd-certs-regenerate:
+tfarm-server-certs-regenerate:
 	TFARMD_WORK_DIR=${TFARMD_WORK_DIR} \
-	./bin/tfarmd certs regenerate
+	./bin/tfarm server certs regenerate
