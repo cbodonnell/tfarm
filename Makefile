@@ -34,3 +34,6 @@ tfarm-server-start-dev:
 tfarm-server-certs-regenerate:
 	TFARMD_WORK_DIR=${TFARMD_WORK_DIR} \
 	./bin/tfarm server certs regenerate
+
+trivy-fs:
+	trivy fs --scanners vuln --ignore-unfixed .
