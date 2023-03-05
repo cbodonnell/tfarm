@@ -92,7 +92,7 @@ func Start() error {
 	}
 	a.Start()
 
-	o.WaitForLogin()
+	o.WaitForConfigure()
 
 	// TODO: propagate errors from the frpc process
 	f.StartAndWait()

@@ -17,73 +17,73 @@ type ClientCredentials struct {
 }
 
 type ClientSecretWorker struct {
-	clientEndpoint       string
-	workDir              string                // directory to store tokens.json
-	loginCredentialsChan chan LoginCredentials // channel for receiving login credentials
-	loginResultChan      chan LoginResult      // channel for sending login result
-	isAuthenticated      bool                  // flag for whether or not the worker is logged in
-	needsLogin           bool
+	clientEndpoint           string
+	workDir                  string                    // directory to store tokens.json
+	configureCredentialsChan chan ConfigureCredentials // channel for receiving configure credentials
+	configureResultChan      chan ConfigureResult      // channel for sending configure result
+	isAuthenticated          bool                      // flag for whether or not the worker is logged in
+	needsConfigure           bool
 }
 
 func NewClientSecretWorker(workDir string) *ClientSecretWorker {
 	return &ClientSecretWorker{
-		workDir:              workDir,
-		loginCredentialsChan: make(chan LoginCredentials),
-		loginResultChan:      make(chan LoginResult),
-		isAuthenticated:      false,
-		needsLogin:           false,
+		workDir:                  workDir,
+		configureCredentialsChan: make(chan ConfigureCredentials),
+		configureResultChan:      make(chan ConfigureResult),
+		isAuthenticated:          false,
+		needsConfigure:           false,
 	}
 }
 
-func (o *ClientSecretWorker) NeedsLogin() bool {
-	return o.needsLogin
+func (o *ClientSecretWorker) NeedsConfigure() bool {
+	return o.needsConfigure
 }
 
 func (o *ClientSecretWorker) IsAuthenticated() bool {
 	return o.isAuthenticated
 }
 
-func (o *ClientSecretWorker) LoginCredentialsChan() chan LoginCredentials {
-	return o.loginCredentialsChan
+func (o *ClientSecretWorker) ConfigureCredentialsChan() chan ConfigureCredentials {
+	return o.configureCredentialsChan
 }
 
-func (o *ClientSecretWorker) LoginResultChan() chan LoginResult {
-	return o.loginResultChan
+func (o *ClientSecretWorker) ConfigureResultChan() chan ConfigureResult {
+	return o.configureResultChan
 }
 
-func (o *ClientSecretWorker) WaitForLogin() {
+func (o *ClientSecretWorker) WaitForConfigure() {
 	for {
 		log.Println("checking for credentials...")
 		credPath := path.Join(o.workDir, "credentials.json")
 		credBytes, err := os.ReadFile(credPath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				o.needsLogin = true
-				log.Println("credentials not found, waiting for login")
-				loginCreds := <-o.loginCredentialsChan
-				o.needsLogin = false
+				o.needsConfigure = true
+				log.Println("credentials not found, waiting for configure...")
+				configureCreds := <-o.configureCredentialsChan
+				o.needsConfigure = false
 
 				creds := &ClientCredentials{
-					ClientID:     loginCreds.Username,
-					ClientSecret: loginCreds.Password,
+					ClientID:     configureCreds.ClientID,
+					ClientSecret: configureCreds.ClientSecret,
 				}
 
-				log.Println("received login, saving credentials...")
+				log.Println("received configure, saving credentials...")
 				credBytes, err := json.Marshal(creds)
 				if err != nil {
 					log.Printf("error marshaling credentials: %s", err)
-					o.loginResultChan <- LoginResult{Error: err}
+					o.configureResultChan <- ConfigureResult{Error: err}
 					continue
 				}
 
 				if err := os.WriteFile(credPath, credBytes, 0644); err != nil {
 					log.Printf("error writing credentials.json: %s", err)
-					o.loginResultChan <- LoginResult{Error: err}
+					o.configureResultChan <- ConfigureResult{Error: err}
 					continue
 				}
 
-				log.Println("login successful")
-				o.loginResultChan <- LoginResult{Success: true}
+				log.Println("configure successful")
+				o.configureResultChan <- ConfigureResult{Success: true}
 				continue
 			}
 

@@ -14,40 +14,40 @@ import (
 )
 
 type OAuthWorker struct {
-	clientEndpoint       string
-	workDir              string                // directory to store tokens.json
-	loginCredentialsChan chan LoginCredentials // channel for receiving login credentials
-	loginResultChan      chan LoginResult      // channel for sending login result
-	isAuthenticated      bool                  // flag for whether or not the worker is logged in
-	needsLogin           bool
+	clientEndpoint           string
+	workDir                  string                    // directory to store tokens.json
+	configureCredentialsChan chan ConfigureCredentials // channel for receiving configure credentials
+	configureResultChan      chan ConfigureResult      // channel for sending configure result
+	isAuthenticated          bool                      // flag for whether or not the worker is logged in
+	needsConfigure           bool
 }
 
 func NewOAuthWorker(clientEndpoint, workDir string) *OAuthWorker {
 	// create an oauth2 config without a client ID or secret
 	return &OAuthWorker{
-		clientEndpoint:       clientEndpoint,
-		workDir:              workDir,
-		loginCredentialsChan: make(chan LoginCredentials),
-		loginResultChan:      make(chan LoginResult),
-		isAuthenticated:      false,
-		needsLogin:           false,
+		clientEndpoint:           clientEndpoint,
+		workDir:                  workDir,
+		configureCredentialsChan: make(chan ConfigureCredentials),
+		configureResultChan:      make(chan ConfigureResult),
+		isAuthenticated:          false,
+		needsConfigure:           false,
 	}
 }
 
-func (o *OAuthWorker) NeedsLogin() bool {
-	return o.needsLogin
+func (o *OAuthWorker) NeedsConfigure() bool {
+	return o.needsConfigure
 }
 
 func (o *OAuthWorker) IsAuthenticated() bool {
 	return o.isAuthenticated
 }
 
-func (o *OAuthWorker) LoginCredentialsChan() chan LoginCredentials {
-	return o.loginCredentialsChan
+func (o *OAuthWorker) ConfigureCredentialsChan() chan ConfigureCredentials {
+	return o.configureCredentialsChan
 }
 
-func (o *OAuthWorker) LoginResultChan() chan LoginResult {
-	return o.loginResultChan
+func (o *OAuthWorker) ConfigureResultChan() chan ConfigureResult {
+	return o.configureResultChan
 }
 
 func (o *OAuthWorker) Start() {
@@ -58,19 +58,19 @@ func (o *OAuthWorker) Start() {
 			tokenBytes, err := os.ReadFile(tokenPath)
 			if err != nil {
 				if os.IsNotExist(err) {
-					o.needsLogin = true
-					log.Println("token not found, waiting for login")
-					credentials := <-o.loginCredentialsChan
-					o.needsLogin = false
-					log.Println("received login, getting token...")
+					o.needsConfigure = true
+					log.Println("token not found, waiting for configure")
+					credentials := <-o.configureCredentialsChan
+					o.needsConfigure = false
+					log.Println("received configure, getting token...")
 
-					token, err := o.GetOAuthToken(credentials.Username, credentials.Password)
+					token, err := o.GetOAuthToken(credentials.ClientID, credentials.ClientSecret)
 					if err != nil {
 						log.Printf("error getting token: %s", err)
 						// TODO: check if the error is an invalid credentials error
 						// if so, send the error back to the channel
 						// otherwise, just send a generic error
-						o.loginResultChan <- LoginResult{Error: err}
+						o.configureResultChan <- ConfigureResult{Error: err}
 						continue
 					}
 
@@ -78,18 +78,18 @@ func (o *OAuthWorker) Start() {
 					tokenBytes, err := json.Marshal(token)
 					if err != nil {
 						log.Printf("error marshaling token: %s", err)
-						o.loginResultChan <- LoginResult{Error: err}
+						o.configureResultChan <- ConfigureResult{Error: err}
 						continue
 					}
 
 					if err := os.WriteFile(tokenPath, tokenBytes, 0644); err != nil {
 						log.Printf("error writing tokens.json: %s", err)
-						o.loginResultChan <- LoginResult{Error: err}
+						o.configureResultChan <- ConfigureResult{Error: err}
 						continue
 					}
 
-					log.Println("login successful")
-					o.loginResultChan <- LoginResult{Success: true}
+					log.Println("configure successful")
+					o.configureResultChan <- ConfigureResult{Success: true}
 					continue
 				}
 
@@ -109,8 +109,8 @@ func (o *OAuthWorker) Start() {
 
 			log.Println("checking if token is valid...")
 			if !token.Valid() {
-				// TODO: refresh the token, but for now delete token and wait for a login
-				log.Println("token is invalid, deleting token and waiting for login")
+				// TODO: refresh the token, but for now delete token and wait for a configure
+				log.Println("token is invalid, deleting token and waiting for configure")
 				if err := os.Remove(tokenPath); err != nil {
 					log.Printf("error deleting tokens.json: %s", err)
 				}
@@ -124,7 +124,7 @@ func (o *OAuthWorker) Start() {
 	}()
 }
 
-func (o *OAuthWorker) WaitForLogin() {
+func (o *OAuthWorker) WaitForConfigure() {
 	for !o.isAuthenticated {
 		time.Sleep(time.Second)
 	}

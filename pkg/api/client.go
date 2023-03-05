@@ -36,10 +36,10 @@ type APIRequest struct {
 	// nothing
 }
 
-type LoginRequest struct {
-	AdminPort int    `json:"admin_port"`
-	Username  string `json:"username"`
-	Password  string `json:"password"`
+type ConfigureRequest struct {
+	AdminPort    int    `json:"admin_port"`
+	ClientID     string `json:"username"`
+	ClientSecret string `json:"password"`
 }
 
 type CreateRequest struct {
@@ -193,14 +193,14 @@ func (c *APIClient) Restart(req *APIRequest) (*APIResponse, error) {
 	return &response, nil
 }
 
-func (c *APIClient) Login(opts *LoginRequest) (*APIResponse, error) {
+func (c *APIClient) Configure(opts *ConfigureRequest) (*APIResponse, error) {
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(opts); err != nil {
 		return nil, err
 	}
 	body := bytes.NewReader(buf.Bytes())
 
-	req, err := http.NewRequest("PUT", c.endpoint+"/api/login", body)
+	req, err := http.NewRequest("PUT", c.endpoint+"/api/configure", body)
 	if err != nil {
 		return nil, err
 	}

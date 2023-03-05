@@ -10,37 +10,38 @@ import (
 	"github.com/cbodonnell/tfarm/pkg/auth"
 )
 
-func HandleLogin(o auth.AuthWorker) func(w http.ResponseWriter, r *http.Request) {
+func HandleConfigure(o auth.AuthWorker) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !o.NeedsLogin() {
-			api.RespondWithError(w, http.StatusUnauthorized, "already logged in")
+		// TODO: Should be able to configure at an
+		if !o.NeedsConfigure() {
+			api.RespondWithError(w, http.StatusUnauthorized, "already configured")
 			return
 		}
 
-		var loginRequest api.LoginRequest
-		if err := json.NewDecoder(r.Body).Decode(&loginRequest); err != nil {
+		var configureRequest api.ConfigureRequest
+		if err := json.NewDecoder(r.Body).Decode(&configureRequest); err != nil {
 			log.Printf("failed to decode request body: %s", err)
 			api.RespondWithError(w, http.StatusBadRequest, "failed to decode request body")
 			return
 		}
 
-		credentials := auth.LoginCredentials{
-			Username: loginRequest.Username,
-			Password: loginRequest.Password,
+		credentials := auth.ConfigureCredentials{
+			ClientID:     configureRequest.ClientID,
+			ClientSecret: configureRequest.ClientSecret,
 		}
 
-		log.Println("sending login credentials to channel")
-		o.LoginCredentialsChan() <- credentials
-		log.Println("sent login credentials to channel")
+		log.Println("sending configure credentials to channel")
+		o.ConfigureCredentialsChan() <- credentials
+		log.Println("sent configure credentials to channel")
 
 		select {
-		case result := <-o.LoginResultChan():
+		case result := <-o.ConfigureResultChan():
 			if !result.Success {
 				api.RespondWithError(w, http.StatusUnauthorized, result.Error.Error())
 				return
 			}
 		case <-time.After(10 * time.Second):
-			api.RespondWithError(w, http.StatusUnauthorized, "failed to login: timeout")
+			api.RespondWithError(w, http.StatusUnauthorized, "failed to configure: timeout")
 			return
 		}
 

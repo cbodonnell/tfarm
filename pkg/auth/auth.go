@@ -1,11 +1,11 @@
 package auth
 
-type LoginCredentials struct {
-	Username string
-	Password string
+type ConfigureCredentials struct {
+	ClientID     string
+	ClientSecret string
 }
 
-type LoginResult struct {
+type ConfigureResult struct {
 	Success bool
 	Error   error
 }
@@ -19,8 +19,8 @@ func (e *ErrInvalidCredentials) Error() string {
 }
 
 type AuthWorker interface {
-	NeedsLogin() bool
+	NeedsConfigure() bool
 	IsAuthenticated() bool
-	LoginCredentialsChan() chan LoginCredentials
-	LoginResultChan() chan LoginResult
+	ConfigureCredentialsChan() chan ConfigureCredentials
+	ConfigureResultChan() chan ConfigureResult
 }

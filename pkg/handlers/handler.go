@@ -12,19 +12,19 @@ import (
 func NewMuxHandler(o auth.AuthWorker, f *frpc.Frpc) http.Handler {
 	r := mux.NewRouter()
 
-	// pre-login routes
-	preLogin := r.NewRoute().Subrouter()
-	preLogin.HandleFunc("/api/login", HandleLogin(o)).Methods("PUT")
+	// pre-configure routes
+	preConfigure := r.NewRoute().Subrouter()
+	preConfigure.HandleFunc("/api/configure", HandleConfigure(o)).Methods("PUT")
 
-	// post-login routes
-	postLogin := r.NewRoute().Subrouter()
-	postLogin.HandleFunc("/api/status", HandleStatus(f)).Methods("GET")
-	postLogin.HandleFunc("/api/verify", HandleVerify(f)).Methods("GET")
-	postLogin.HandleFunc("/api/reload", HandleReload(f)).Methods("POST")
-	postLogin.HandleFunc("/api/restart", HandleRestart(f)).Methods("POST")
-	postLogin.HandleFunc("/api/tunnel", HandleCreate(f)).Methods("POST")
-	postLogin.HandleFunc("/api/tunnel/{name}", HandleDelete(f)).Methods("DELETE")
-	postLogin.Use(IsAuthenticated(o))
+	// post-configure routes
+	postConfigure := r.NewRoute().Subrouter()
+	postConfigure.HandleFunc("/api/status", HandleStatus(f)).Methods("GET")
+	postConfigure.HandleFunc("/api/verify", HandleVerify(f)).Methods("GET")
+	postConfigure.HandleFunc("/api/reload", HandleReload(f)).Methods("POST")
+	postConfigure.HandleFunc("/api/restart", HandleRestart(f)).Methods("POST")
+	postConfigure.HandleFunc("/api/tunnel", HandleCreate(f)).Methods("POST")
+	postConfigure.HandleFunc("/api/tunnel/{name}", HandleDelete(f)).Methods("DELETE")
+	postConfigure.Use(IsAuthenticated(o))
 
 	return r
 }
