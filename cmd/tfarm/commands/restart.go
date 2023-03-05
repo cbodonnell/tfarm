@@ -7,14 +7,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var restartCmd = &cobra.Command{
-	Use:           "restart",
-	Short:         "Restart frpc",
-	SilenceUsage:  true,
-	SilenceErrors: false,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return Restart()
-	},
+func RestartCmd() *cobra.Command {
+	restartCmd := &cobra.Command{
+		Use:           "restart",
+		Short:         "Restart frpc",
+		SilenceUsage:  true,
+		SilenceErrors: false,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return Restart()
+		},
+	}
+
+	return restartCmd
 }
 
 func Restart() error {

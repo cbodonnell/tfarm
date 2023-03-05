@@ -7,14 +7,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var reloadCmd = &cobra.Command{
-	Use:           "reload",
-	Short:         "Reload the frpc configuration",
-	SilenceUsage:  true,
-	SilenceErrors: false,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return Reload()
-	},
+func ReloadCmd() *cobra.Command {
+	reloadCmd := &cobra.Command{
+		Use:           "reload",
+		Short:         "Reload the frpc configuration",
+		SilenceUsage:  true,
+		SilenceErrors: false,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return Reload()
+		},
+	}
+
+	return reloadCmd
 }
 
 func Reload() error {

@@ -7,14 +7,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var statusCmd = &cobra.Command{
-	Use:           "status",
-	Short:         "Get the status of all tunnels",
-	SilenceUsage:  true,
-	SilenceErrors: false,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return Status()
-	},
+func StatusCmd() *cobra.Command {
+	statusCmd := &cobra.Command{
+		Use:           "status",
+		Short:         "Get the status of all tunnels",
+		SilenceUsage:  true,
+		SilenceErrors: false,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return Status()
+		},
+	}
+
+	return statusCmd
 }
 
 func Status() error {

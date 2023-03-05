@@ -7,14 +7,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var verifyCmd = &cobra.Command{
-	Use:           "verify",
-	Short:         "Verify the frpc configuration",
-	SilenceUsage:  true,
-	SilenceErrors: false,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return Verify()
-	},
+func VerifyCmd() *cobra.Command {
+	verifyCmd := &cobra.Command{
+		Use:           "verify",
+		Short:         "Verify the frpc configuration",
+		SilenceUsage:  true,
+		SilenceErrors: false,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return Verify()
+		},
+	}
+
+	return verifyCmd
 }
 
 func Verify() error {

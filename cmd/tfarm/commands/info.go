@@ -7,23 +7,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var infoCmd = &cobra.Command{
-	Use:           "info",
-	Short:         "Print information about the daemon",
-	SilenceUsage:  true,
-	SilenceErrors: false,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return Info()
-	},
-}
+func InfoCmd() *cobra.Command {
+	var outputFormat string
 
-var outputFormat string
+	infoCmd := &cobra.Command{
+		Use:           "info",
+		Short:         "Print information about the daemon",
+		SilenceUsage:  true,
+		SilenceErrors: false,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return Info(outputFormat)
+		},
+	}
 
-func init() {
 	infoCmd.Flags().StringVarP(&outputFormat, "output", "o", "text", "Output format (text, json)")
+
+	return infoCmd
 }
 
-func Info() error {
+func Info(outputFormat string) error {
 	info, err := client.Info()
 	if err != nil {
 		return fmt.Errorf("error getting info: %s", err)

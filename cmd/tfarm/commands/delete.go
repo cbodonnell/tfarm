@@ -7,22 +7,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var deleteCmd = &cobra.Command{
-	Use:           "delete [NAME]",
-	Short:         "Delete a tunnel",
-	SilenceUsage:  true,
-	SilenceErrors: false,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
-			return fmt.Errorf("name is required")
-		}
-		return Delete(args)
-	},
+func DeleteCmd() *cobra.Command {
+	deleteCmd := &cobra.Command{
+		Use:           "delete [NAME]",
+		Short:         "Delete a tunnel",
+		SilenceUsage:  true,
+		SilenceErrors: false,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) != 1 {
+				return fmt.Errorf("name is required")
+			}
+			return Delete(args[0])
+		},
+	}
+
+	return deleteCmd
 }
 
-func Delete(args []string) error {
+func Delete(name string) error {
 	req := &api.DeleteRequest{
-		Name: args[0],
+		Name: name,
 	}
 	status, err := client.Delete(req)
 	if err != nil {

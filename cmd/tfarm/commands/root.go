@@ -25,13 +25,13 @@ func RootCmd() *cobra.Command {
 	}
 
 	rootCmd.AddCommand(CreateCmd())
-	rootCmd.AddCommand(deleteCmd)
-	rootCmd.AddCommand(infoCmd)
+	rootCmd.AddCommand(DeleteCmd())
+	rootCmd.AddCommand(InfoCmd())
 	rootCmd.AddCommand(ConfigureCmd())
-	rootCmd.AddCommand(reloadCmd)
-	rootCmd.AddCommand(restartCmd)
-	rootCmd.AddCommand(statusCmd)
-	rootCmd.AddCommand(verifyCmd)
+	rootCmd.AddCommand(ReloadCmd())
+	rootCmd.AddCommand(RestartCmd())
+	rootCmd.AddCommand(StatusCmd())
+	rootCmd.AddCommand(VerifyCmd())
 
 	// add the server subcommand
 	rootCmd.AddCommand(server.RootCmd())
