@@ -14,7 +14,7 @@ import (
 func RootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:     "tfarm",
-		Short:   "tfarm - a CLI to interact with the tfarmd daemon",
+		Short:   "tfarm - a CLI for creating and managing tunnels",
 		Version: version.Version,
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) == 0 {
