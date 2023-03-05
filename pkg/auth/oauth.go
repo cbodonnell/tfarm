@@ -53,7 +53,7 @@ func (o *OAuthWorker) ConfigureResultChan() chan ConfigureResult {
 func (o *OAuthWorker) Start() {
 	go func() {
 		for {
-			log.Println("checking for token...")
+			log.Println("checking for token")
 			tokenPath := path.Join(o.workDir, "tokens.json")
 			tokenBytes, err := os.ReadFile(tokenPath)
 			if err != nil {
@@ -62,7 +62,7 @@ func (o *OAuthWorker) Start() {
 					log.Println("token not found, waiting for configure")
 					credentials := <-o.configureCredentialsChan
 					o.needsConfigure = false
-					log.Println("received configure, getting token...")
+					log.Println("received configure, getting token")
 
 					token, err := o.GetOAuthToken(credentials.ClientID, credentials.ClientSecret)
 					if err != nil {
@@ -74,7 +74,7 @@ func (o *OAuthWorker) Start() {
 						continue
 					}
 
-					log.Println("saving token...")
+					log.Println("saving token")
 					tokenBytes, err := json.Marshal(token)
 					if err != nil {
 						log.Printf("error marshaling token: %s", err)
@@ -97,7 +97,7 @@ func (o *OAuthWorker) Start() {
 				continue
 			}
 
-			log.Println("unmarshaling token...")
+			log.Println("unmarshaling token")
 			token := &oauth2.Token{}
 			if err := json.Unmarshal(tokenBytes, token); err != nil {
 				log.Printf("error unmarshaling token: %s", err)
@@ -107,7 +107,7 @@ func (o *OAuthWorker) Start() {
 				continue
 			}
 
-			log.Println("checking if token is valid...")
+			log.Println("checking if token is valid")
 			if !token.Valid() {
 				// TODO: refresh the token, but for now delete token and wait for a configure
 				log.Println("token is invalid, deleting token and waiting for configure")

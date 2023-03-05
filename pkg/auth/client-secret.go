@@ -53,7 +53,7 @@ func (o *ClientSecretWorker) ConfigureResultChan() chan ConfigureResult {
 
 func (o *ClientSecretWorker) WaitForConfigure() {
 	for {
-		log.Println("checking for credentials...")
+		log.Println("checking for credentials")
 		credPath := path.Join(o.workDir, "credentials.json")
 		credBytes, err := os.ReadFile(credPath)
 		if err != nil {
@@ -68,7 +68,7 @@ func (o *ClientSecretWorker) WaitForConfigure() {
 					ClientSecret: configureCreds.ClientSecret,
 				}
 
-				log.Println("received configure, saving credentials...")
+				log.Println("received configure, saving credentials")
 				credBytes, err := json.Marshal(creds)
 				if err != nil {
 					log.Printf("error marshaling credentials: %s", err)
@@ -91,7 +91,7 @@ func (o *ClientSecretWorker) WaitForConfigure() {
 			continue
 		}
 
-		log.Println("unmarshaling credentials...")
+		log.Println("unmarshaling credentials")
 		creds := &ClientCredentials{}
 		if err := json.Unmarshal(credBytes, creds); err != nil {
 			log.Printf("error unmarshaling credentials: %s", err)
@@ -107,7 +107,7 @@ func (o *ClientSecretWorker) WaitForConfigure() {
 			continue
 		}
 
-		log.Println("writing credentials to frpc config...")
+		log.Println("writing credentials to frpc config")
 		cfg, err := frpc.ParseFrpcCommonConfig(path.Join(o.workDir, "frpc.ini"))
 		if err != nil {
 			log.Printf("error parsing frpc.ini: %s", err)
