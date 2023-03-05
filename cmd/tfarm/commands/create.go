@@ -7,36 +7,38 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var createCmd = &cobra.Command{
-	Use:           "create [NAME]",
-	Short:         "Create a new tunnel",
-	SilenceUsage:  true,
-	SilenceErrors: false,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
-			return fmt.Errorf("name is required")
-		}
-		return Create(args)
-	},
-}
+func CreateCmd() *cobra.Command {
+	var tunnelType string
+	var localIP string
+	var localPort int
 
-var tunnelType string
-var localIP string
-var localPort int
+	createCmd := &cobra.Command{
+		Use:           "create [NAME]",
+		Short:         "Create a new tunnel",
+		SilenceUsage:  true,
+		SilenceErrors: false,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) != 1 {
+				return fmt.Errorf("name is required")
+			}
+			return Create(args[0], tunnelType, localIP, localPort)
+		},
+	}
 
-func init() {
 	createCmd.Flags().StringVarP(&tunnelType, "type", "t", "http", "tunnel type (http, tcp, udp)")
 	createCmd.Flags().StringVarP(&localIP, "local-ip", "l", "127.0.0.1", "local ip address")
 	createCmd.Flags().IntVarP(&localPort, "local-port", "p", 0, "local port (required)")
+
+	return createCmd
 }
 
-func Create(args []string) error {
+func Create(name string, tunnelType string, localIP string, localPort int) error {
 	if localPort == 0 {
 		return fmt.Errorf("local port is required")
 	}
 
 	req := &api.CreateRequest{
-		Name:      args[0],
+		Name:      name,
 		Type:      tunnelType,
 		LocalIP:   localIP,
 		LocalPort: localPort,

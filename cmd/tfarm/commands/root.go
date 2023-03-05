@@ -24,7 +24,7 @@ func RootCmd() *cobra.Command {
 		},
 	}
 
-	rootCmd.AddCommand(createCmd)
+	rootCmd.AddCommand(CreateCmd())
 	rootCmd.AddCommand(deleteCmd)
 	rootCmd.AddCommand(infoCmd)
 	rootCmd.AddCommand(loginCmd)
