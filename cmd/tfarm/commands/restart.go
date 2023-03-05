@@ -17,10 +17,6 @@ var restartCmd = &cobra.Command{
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(restartCmd)
-}
-
 func Restart() error {
 	req := &api.APIRequest{}
 	status, err := client.Restart(req)

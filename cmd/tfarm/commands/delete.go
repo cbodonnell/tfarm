@@ -20,10 +20,6 @@ var deleteCmd = &cobra.Command{
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(deleteCmd)
-}
-
 func Delete(args []string) error {
 	req := &api.DeleteRequest{
 		Name: args[0],

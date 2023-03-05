@@ -1,4 +1,4 @@
-package commands
+package server
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ import (
 
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Start tfarmd",
+	Short: "Start tfarm server",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return Start()
 	},
@@ -39,7 +39,6 @@ func init() {
 	startCmd.Flags().StringVar(&frpsServerAddr, "frps-server-addr", "127.0.0.1", "frps server address")
 	startCmd.Flags().IntVar(&frpsServerPort, "frps-server-port", 7000, "frps server port")
 	startCmd.Flags().StringVar(&frpsToken, "frps-token", "", "frps token")
-	rootCmd.AddCommand(startCmd)
 }
 
 func Start() error {

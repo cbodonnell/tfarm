@@ -17,10 +17,6 @@ var reloadCmd = &cobra.Command{
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(reloadCmd)
-}
-
 func Reload() error {
 	req := &api.APIRequest{}
 	status, err := client.Reload(req)

@@ -28,7 +28,6 @@ func init() {
 	createCmd.Flags().StringVarP(&tunnelType, "type", "t", "http", "tunnel type (http, tcp, udp)")
 	createCmd.Flags().StringVarP(&localIP, "local-ip", "l", "127.0.0.1", "local ip address")
 	createCmd.Flags().IntVarP(&localPort, "local-port", "p", 0, "local port (required)")
-	rootCmd.AddCommand(createCmd)
 }
 
 func Create(args []string) error {

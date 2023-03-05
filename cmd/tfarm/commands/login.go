@@ -25,7 +25,6 @@ var password string
 func init() {
 	loginCmd.Flags().StringVarP(&username, "username", "u", "", "tunnel.farm username")
 	loginCmd.Flags().StringVarP(&password, "password", "p", "", "tunnel.farm password")
-	rootCmd.AddCommand(loginCmd)
 }
 
 func Login() error {

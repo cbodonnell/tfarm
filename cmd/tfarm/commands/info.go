@@ -21,7 +21,6 @@ var outputFormat string
 
 func init() {
 	infoCmd.Flags().StringVarP(&outputFormat, "output", "o", "text", "Output format (text, json)")
-	rootCmd.AddCommand(infoCmd)
 }
 
 func Info() error {

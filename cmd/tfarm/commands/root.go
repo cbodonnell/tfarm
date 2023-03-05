@@ -5,21 +5,38 @@ import (
 	"os"
 	"path"
 
+	"github.com/cbodonnell/tfarm/cmd/tfarm/commands/server"
 	"github.com/cbodonnell/tfarm/pkg/api"
 	"github.com/cbodonnell/tfarm/pkg/version"
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use:     "tfarm",
-	Short:   "tfarm - a CLI to interact with the tfarmd daemon",
-	Version: version.Version,
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			cmd.Help()
-			os.Exit(0)
-		}
-	},
+func RootCmd() *cobra.Command {
+	rootCmd := &cobra.Command{
+		Use:     "tfarm",
+		Short:   "tfarm - a CLI to interact with the tfarmd daemon",
+		Version: version.Version,
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) == 0 {
+				cmd.Help()
+				os.Exit(0)
+			}
+		},
+	}
+
+	rootCmd.AddCommand(createCmd)
+	rootCmd.AddCommand(deleteCmd)
+	rootCmd.AddCommand(infoCmd)
+	rootCmd.AddCommand(loginCmd)
+	rootCmd.AddCommand(reloadCmd)
+	rootCmd.AddCommand(restartCmd)
+	rootCmd.AddCommand(statusCmd)
+	rootCmd.AddCommand(verifyCmd)
+
+	// add the server subcommand
+	rootCmd.AddCommand(server.RootCmd())
+
+	return rootCmd
 }
 
 // client is the API client used by all commands
@@ -51,7 +68,7 @@ func InitAndExecute() {
 
 	client = newClient
 
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd().Execute(); err != nil {
 		os.Exit(1)
 	}
 }

@@ -17,10 +17,6 @@ var statusCmd = &cobra.Command{
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(statusCmd)
-}
-
 func Status() error {
 	req := &api.APIRequest{}
 	status, err := client.Status(req)

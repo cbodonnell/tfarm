@@ -1,4 +1,4 @@
-package commands
+package server
 
 import (
 	"github.com/spf13/cobra"
@@ -14,8 +14,4 @@ var certsCmd = &cobra.Command{
 			cmd.Help()
 		}
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(certsCmd)
 }

@@ -17,10 +17,6 @@ var verifyCmd = &cobra.Command{
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(verifyCmd)
-}
-
 func Verify() error {
 	req := &api.APIRequest{}
 	status, err := client.Verify(req)
