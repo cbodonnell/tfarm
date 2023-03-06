@@ -9,7 +9,7 @@ import (
 func RootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "server",
-		Short: "Interface with the tfarmd server",
+		Short: "Interface with the tfarm server",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) == 0 {
 				cmd.Help()
