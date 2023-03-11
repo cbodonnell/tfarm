@@ -7,7 +7,6 @@ import (
 	"path"
 
 	"github.com/cbodonnell/tfarm/pkg/api"
-	"github.com/cbodonnell/tfarm/pkg/auth"
 	"github.com/cbodonnell/tfarm/pkg/frpc"
 	"github.com/cbodonnell/tfarm/pkg/handlers"
 	"github.com/cbodonnell/tfarm/pkg/version"
@@ -16,8 +15,10 @@ import (
 )
 
 var startCmd = &cobra.Command{
-	Use:   "start",
-	Short: "Start tfarm server",
+	Use:           "start",
+	Short:         "Start tfarm server",
+	SilenceUsage:  true,
+	SilenceErrors: false,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return Start()
 	},
@@ -76,10 +77,16 @@ func Start() error {
 		return fmt.Errorf("error saving frpc config: %s", err)
 	}
 
-	o := auth.NewClientSecretWorker(workDir)
 	f := frpc.New(frpcBinPath, workDir)
 
-	h := handlers.NewMuxHandler(o, f)
+	if err := f.SetCredentials(); err != nil {
+		if _, ok := err.(*frpc.ErrCredentialsNotFound); !ok {
+			return fmt.Errorf("error setting credentials: %s", err)
+		}
+		return fmt.Errorf("credentials not found, run `tfarm server configure` to set them")
+	}
+
+	h := handlers.NewMuxHandler(f)
 	tls := &api.TLSFiles{
 		CertFile: path.Join(workDir, "tls", "server.crt"),
 		KeyFile:  path.Join(workDir, "tls", "server.key"),
@@ -91,8 +98,6 @@ func Start() error {
 		return fmt.Errorf("error starting api server: %s", err)
 	}
 	a.Start()
-
-	o.WaitForConfigure()
 
 	// TODO: propagate errors from the frpc process
 	f.StartAndWait()

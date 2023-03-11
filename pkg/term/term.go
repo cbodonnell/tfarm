@@ -29,14 +29,9 @@ func StringPrompt(label string) string {
 // while typing.
 func PasswordPrompt(label string) string {
 	var s string
-	for {
-		fmt.Fprint(os.Stderr, label+" ")
-		b, _ := term.ReadPassword(int(syscall.Stdin))
-		s = string(b)
-		if s != "" {
-			break
-		}
-	}
+	fmt.Fprint(os.Stderr, label+" ")
+	b, _ := term.ReadPassword(int(syscall.Stdin))
+	s = string(b)
 	fmt.Println()
 	return s
 }

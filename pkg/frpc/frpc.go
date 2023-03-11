@@ -2,6 +2,7 @@ package frpc
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,6 +14,8 @@ import (
 	"path"
 	"time"
 
+	"github.com/cbodonnell/tfarm/pkg/auth"
+	"github.com/cbodonnell/tfarm/pkg/crypto"
 	"github.com/cbodonnell/tfarm/pkg/logging"
 	"github.com/fatedier/frp/client"
 	"github.com/fatedier/frp/pkg/config"
@@ -30,6 +33,14 @@ type Frpc struct {
 	restarting bool
 }
 
+type ErrCredentialsNotFound struct {
+	Err error
+}
+
+func (e *ErrCredentialsNotFound) Error() string {
+	return fmt.Sprintf("credentials not found: %s", e.Err)
+}
+
 func New(binPath, workDir string) *Frpc {
 	return &Frpc{
 		binPath:    binPath,
@@ -41,6 +52,48 @@ func New(binPath, workDir string) *Frpc {
 		ExitChan:   make(chan struct{}),
 		restarting: false,
 	}
+}
+
+func (f *Frpc) SetCredentials() error {
+	credsPath := path.Join(f.WorkDir, "credentials.json")
+	if _, err := os.Stat(credsPath); errors.Is(err, os.ErrNotExist) {
+		return &ErrCredentialsNotFound{Err: err}
+	} else if err != nil {
+		return fmt.Errorf("error checking for credentials.json: %s", err)
+	}
+
+	b, err := os.ReadFile(credsPath)
+	if err != nil {
+		return fmt.Errorf("error reading credentials.json: %s", err)
+	}
+
+	creds := &auth.ConfigureCredentials{}
+	if err := json.Unmarshal(b, creds); err != nil {
+		return fmt.Errorf("error unmarshaling credentials.json: %s", err)
+	}
+
+	decodedSecret, err := base64.StdEncoding.DecodeString(creds.ClientSecret)
+	if err != nil {
+		return fmt.Errorf("error decoding client secret: %s", err)
+	}
+
+	cfg, err := ParseFrpcCommonConfig(path.Join(f.WorkDir, "frpc.ini"))
+	if err != nil {
+		return fmt.Errorf("error reading frpc.ini: %s", err)
+	}
+
+	if cfg.Metas == nil {
+		cfg.Metas = make(map[string]string)
+	}
+
+	cfg.Metas["client_id"] = creds.ClientID
+	cfg.Metas["client_signature"] = crypto.HMAC(decodedSecret, []byte(creds.ClientID))
+
+	if err := SaveFrpcCommonConfig(cfg, path.Join(f.WorkDir, "frpc.ini")); err != nil {
+		return fmt.Errorf("error writing frpc.ini: %s", err)
+	}
+
+	return nil
 }
 
 func (f *Frpc) Start() error {
@@ -129,6 +182,13 @@ func (f *Frpc) Restart() error {
 		return fmt.Errorf("failed to stop frpc: %s", err)
 	}
 	f.restarting = false
+
+	if err := f.SetCredentials(); err != nil {
+		if _, ok := err.(*ErrCredentialsNotFound); !ok {
+			return fmt.Errorf("error setting credentials: %s", err)
+		}
+		return fmt.Errorf("credentials not found, run `tfarm server configure` to set them")
+	}
 
 	f.StartAndWait()
 

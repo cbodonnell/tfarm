@@ -31,6 +31,10 @@ tfarm-server-start-dev:
 		--frps-token=${TFARMD_FRPS_TOKEN} \
 		--frpc-log-level ${TFARMD_LOG_LEVEL}
 
+tfarm-server-configure-dev:
+	TFARMD_WORK_DIR=${TFARMD_DEV_WORK_DIR} \
+	./bin/tfarm server configure
+
 tfarm-server-certs-regenerate:
 	TFARMD_WORK_DIR=${TFARMD_WORK_DIR} \
 	./bin/tfarm server certs regenerate

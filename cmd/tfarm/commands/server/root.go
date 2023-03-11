@@ -18,7 +18,9 @@ func RootCmd() *cobra.Command {
 		},
 	}
 
+	// TODO: add start and certs command as function calls
 	rootCmd.AddCommand(startCmd)
+	rootCmd.AddCommand(ConfigureCmd())
 	rootCmd.AddCommand(certsCmd)
 
 	return rootCmd
