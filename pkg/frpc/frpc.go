@@ -62,7 +62,7 @@ func (f *Frpc) IsCmd() bool {
 
 func (f *Frpc) StartLoop() {
 	go func() {
-		retrySeconds := 1
+		restartDelay := 5 * time.Second
 		for {
 			creds, err := auth.WaitForCredentials(f.WorkDir)
 			if err != nil {
@@ -78,11 +78,8 @@ func (f *Frpc) StartLoop() {
 			select {
 			case err = <-f.ErrChan:
 				log.Printf("frpc exited: %s", err)
-				log.Printf("restarting frpc in %d seconds", retrySeconds)
-				time.Sleep(time.Duration(retrySeconds) * time.Second)
-				if retrySeconds < 60 {
-					retrySeconds *= 2
-				}
+				log.Printf("restarting frpc in %s", restartDelay.String())
+				time.Sleep(restartDelay)
 			}
 		}
 	}()
