@@ -1,6 +1,6 @@
 # tfarm
 
-tfarm is a tool for creating and managing tunnels. It is a wrapper around [frp](https://github.com/fatedier/frp) that provides a simple interface for managing tunnels. It consists of two components: a server and a client. The server is a wrapper around `frpc` that manages tunnels. The client is a CLI for interfacing with the server to create and manage tunnels.
+`tfarm` is a tool for creating and managing tunnels. It is a wrapper around [frp](https://github.com/fatedier/frp) that provides a simple interface for managing tunnels. It consists of two components: a server and a client. The server is a wrapper around `frpc` that manages tunnels. The client is a CLI for interfacing with the server to create and manage tunnels.
 
 ## Installation
 
@@ -72,7 +72,7 @@ tfarm status
 
 #### Create a tunnel
 
-Create a tunnel that forwards traffic from the tunnel to local port 8080.
+Create a tunnel that forwards traffic to local port 8080.
 
 ```bash
 tfarm create my-tunnel -p 8080
