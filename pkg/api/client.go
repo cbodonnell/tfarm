@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"path"
 
+	"github.com/cbodonnell/tfarm/pkg/auth"
 	"github.com/cbodonnell/tfarm/pkg/version"
 )
 
@@ -34,12 +35,6 @@ type APIResponse struct {
 
 type APIRequest struct {
 	// nothing
-}
-
-type ConfigureRequest struct {
-	AdminPort    int    `json:"admin_port"`
-	ClientID     string `json:"username"`
-	ClientSecret string `json:"password"`
 }
 
 type CreateRequest struct {
@@ -112,18 +107,11 @@ func (c *APIClient) Status(req *APIRequest) (*APIResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, body)
-	}
-
 	var response APIResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode response with status code %d: %s", resp.StatusCode, err)
 	}
+
 	return &response, nil
 }
 
@@ -134,18 +122,11 @@ func (c *APIClient) Verify(req *APIRequest) (*APIResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, body)
-	}
-
 	var response APIResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode response with status code %d: %s", resp.StatusCode, err)
 	}
+
 	return &response, nil
 }
 
@@ -166,8 +147,9 @@ func (c *APIClient) Reload(req *APIRequest) (*APIResponse, error) {
 
 	var response APIResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode response with status code %d: %s", resp.StatusCode, err)
 	}
+
 	return &response, nil
 }
 
@@ -178,24 +160,17 @@ func (c *APIClient) Restart(req *APIRequest) (*APIResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, body)
-	}
-
 	var response APIResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode response with status code %d: %s", resp.StatusCode, err)
 	}
+
 	return &response, nil
 }
 
-func (c *APIClient) Configure(opts *ConfigureRequest) (*APIResponse, error) {
+func (c *APIClient) Configure(credentials *auth.ConfigureCredentials) (*APIResponse, error) {
 	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(opts); err != nil {
+	if err := json.NewEncoder(&buf).Encode(credentials); err != nil {
 		return nil, err
 	}
 	body := bytes.NewReader(buf.Bytes())
@@ -211,18 +186,11 @@ func (c *APIClient) Configure(opts *ConfigureRequest) (*APIResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, body)
-	}
-
 	var response APIResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode response with status code %d: %s", resp.StatusCode, err)
 	}
+
 	return &response, nil
 }
 
@@ -239,18 +207,11 @@ func (c *APIClient) Create(req *CreateRequest) (*APIResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, body)
-	}
-
 	var response APIResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode response with status code %d: %s", resp.StatusCode, err)
 	}
+
 	return &response, nil
 }
 
@@ -266,17 +227,10 @@ func (c *APIClient) Delete(opts *DeleteRequest) (*APIResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, body)
-	}
-
 	var response APIResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode response with status code %d: %s", resp.StatusCode, err)
 	}
+
 	return &response, nil
 }

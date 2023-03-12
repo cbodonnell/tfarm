@@ -54,24 +54,11 @@ func New(binPath, workDir string) *Frpc {
 	}
 }
 
-func (f *Frpc) SetCredentials() error {
-	credsPath := path.Join(f.WorkDir, "credentials.json")
-	if _, err := os.Stat(credsPath); errors.Is(err, os.ErrNotExist) {
-		return &ErrCredentialsNotFound{Err: err}
-	} else if err != nil {
-		return fmt.Errorf("error checking for credentials.json: %s", err)
-	}
+func (f *Frpc) IsCmd() bool {
+	return f.cmd != nil
+}
 
-	b, err := os.ReadFile(credsPath)
-	if err != nil {
-		return fmt.Errorf("error reading credentials.json: %s", err)
-	}
-
-	creds := &auth.ConfigureCredentials{}
-	if err := json.Unmarshal(b, creds); err != nil {
-		return fmt.Errorf("error unmarshaling credentials.json: %s", err)
-	}
-
+func (f *Frpc) SignConfig(creds *auth.ConfigureCredentials) error {
 	decodedSecret, err := base64.StdEncoding.DecodeString(creds.ClientSecret)
 	if err != nil {
 		return fmt.Errorf("error decoding client secret: %s", err)
@@ -111,6 +98,7 @@ func (f *Frpc) Start() error {
 	go logging.LogReaderWithPrefix(stderr, "frpc stderr: ")
 
 	if err := f.cmd.Start(); err != nil {
+		f.cmd = nil
 		return fmt.Errorf("failed to start frpc: %s", err)
 	}
 
@@ -128,9 +116,11 @@ func (f *Frpc) Wait() error {
 		if f.restarting {
 			return nil
 		}
+		f.cmd = nil
 		return fmt.Errorf("frpc exited unexpectedly: %s", err)
 	}
 
+	f.cmd = nil
 	return errors.New("frpc exited unexpectedly with no error")
 }
 
@@ -138,10 +128,12 @@ func (f *Frpc) StartAndWait() {
 	go func() {
 		if err := f.Start(); err != nil {
 			f.ErrChan <- fmt.Errorf("failed to start frpc: %s", err)
+			return
 		}
 
 		if err := f.Wait(); err != nil {
 			f.ErrChan <- fmt.Errorf("frpc exited unexpectedly: %s", err)
+			return
 		}
 
 		f.ExitChan <- struct{}{}
@@ -183,11 +175,13 @@ func (f *Frpc) Restart() error {
 	}
 	f.restarting = false
 
-	if err := f.SetCredentials(); err != nil {
-		if _, ok := err.(*ErrCredentialsNotFound); !ok {
-			return fmt.Errorf("error setting credentials: %s", err)
-		}
-		return fmt.Errorf("credentials not found, run `tfarm server configure` to set them")
+	creds, err := auth.WaitForCredentials(f.WorkDir)
+	if err != nil {
+		return fmt.Errorf("error waiting for credentials: %s", err)
+	}
+
+	if err := f.SignConfig(creds); err != nil {
+		return fmt.Errorf("error signing config: %s", err)
 	}
 
 	f.StartAndWait()

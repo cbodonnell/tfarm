@@ -14,15 +14,15 @@ var configTemplate = `[common]
 server_addr = {{ .ServerAddr }}
 server_port = {{ .ServerPort }}
 authentication_method = token
-token = {{ .Token }}
+token = "{{ .Token }}"
 authenticate_new_work_conns = true
 authenticate_heartbeats = true
 admin_addr = {{ .AdminAddr }}
 admin_port = {{ .AdminPort }}
 includes = ./conf.d/*.ini
 log_level = {{ .LogLevel }}
-meta_client_id = {{ index .Metas "client_id" }}
-meta_client_signature = {{ index .Metas "client_signature" }}
+meta_client_id = "{{ index .Metas "client_id" }}"
+meta_client_signature = "{{ index .Metas "client_signature" }}"
 `
 
 // ParseFrpcCommonConfig parses the common section of a frpc configuration file.

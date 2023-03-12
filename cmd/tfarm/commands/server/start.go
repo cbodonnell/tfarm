@@ -5,8 +5,10 @@ import (
 	"log"
 	"os"
 	"path"
+	"time"
 
 	"github.com/cbodonnell/tfarm/pkg/api"
+	"github.com/cbodonnell/tfarm/pkg/auth"
 	"github.com/cbodonnell/tfarm/pkg/frpc"
 	"github.com/cbodonnell/tfarm/pkg/handlers"
 	"github.com/cbodonnell/tfarm/pkg/version"
@@ -79,13 +81,6 @@ func Start() error {
 
 	f := frpc.New(frpcBinPath, workDir)
 
-	if err := f.SetCredentials(); err != nil {
-		if _, ok := err.(*frpc.ErrCredentialsNotFound); !ok {
-			return fmt.Errorf("error setting credentials: %s", err)
-		}
-		return fmt.Errorf("credentials not found, run `tfarm server configure` to set them")
-	}
-
 	h := handlers.NewMuxHandler(f)
 	tls := &api.TLSFiles{
 		CertFile: path.Join(workDir, "tls", "server.crt"),
@@ -99,13 +94,33 @@ func Start() error {
 	}
 	a.Start()
 
-	// TODO: propagate errors from the frpc process
-	f.StartAndWait()
+	frpcStartErrChan := make(chan error)
+	go func(frpcStartErrChan chan error) {
+		retrySeconds := 5
+		for {
+			creds, err := auth.WaitForCredentials(f.WorkDir)
+			if err != nil {
+				frpcStartErrChan <- fmt.Errorf("error waiting for credentials: %s", err)
+			}
+
+			if err := f.SignConfig(creds); err != nil {
+				frpcStartErrChan <- fmt.Errorf("error signing frpc config: %s", err)
+			}
+
+			f.StartAndWait()
+
+			err = <-f.ErrChan
+			log.Printf("frpc exited: %s", err)
+			log.Printf("restarting frpc in %d seconds", retrySeconds)
+			time.Sleep(time.Duration(retrySeconds) * time.Second)
+		}
+	}(frpcStartErrChan)
 
 	select {
-	case err := <-f.ErrChan:
-		return fmt.Errorf("frpc exited: %s", err)
+	case err := <-frpcStartErrChan:
+		return fmt.Errorf("error starting frpc: %s", err)
 	case err := <-a.ErrChan:
 		return fmt.Errorf("api server exited: %s", err)
 	}
+
 }
