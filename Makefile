@@ -18,17 +18,15 @@ tfarm-server-start:
 	TFARMD_WORK_DIR=${TFARMD_WORK_DIR} \
 	TFARMD_LOG_LEVEL=${TFARMD_LOG_LEVEL} \
 	./bin/tfarm server start \
+		--frps-server-addr=localhost \
+		--frps-server-port=7000 \
 		--frpc-log-level ${TFARMD_LOG_LEVEL}
 
 tfarm-server-start-dev:
 	TFARMD_FRPC_BIN_PATH=${TFARMD_FRPC_BIN_PATH} \
 	TFARMD_WORK_DIR=${TFARMD_DEV_WORK_DIR} \
 	TFARMD_LOG_LEVEL=${TFARMD_LOG_LEVEL} \
-	TFARMD_FRPS_TOKEN=${TFARMD_FRPS_TOKEN} \
 	./bin/tfarm server start \
-		--frps-server-addr=ranch.tunnel.farm \
-		--frps-server-port=30070 \
-		--frps-token=${TFARMD_FRPS_TOKEN} \
 		--frpc-log-level ${TFARMD_LOG_LEVEL}
 
 tfarm-server-configure-dev:
