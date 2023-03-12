@@ -36,7 +36,7 @@ tfarm server start
 
 #### Configure the tfarm server as a ranch client
 
-Use the `tfarm ranch` command to interact with the tfarm ranch. The tfarm ranch is a the `frps` server that the tfarm server `frpc` connects to. It acts an identity and access layer for `frps`.
+Use the `tfarm ranch` command to interact with the tfarm ranch. The tfarm ranch the `frps` server that `frpc` connects to. It provides an identity and access layer for `frps`.
 
 Login to the tfarm ranch.
 
