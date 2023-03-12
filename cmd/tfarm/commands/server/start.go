@@ -5,10 +5,8 @@ import (
 	"log"
 	"os"
 	"path"
-	"time"
 
 	"github.com/cbodonnell/tfarm/pkg/api"
-	"github.com/cbodonnell/tfarm/pkg/auth"
 	"github.com/cbodonnell/tfarm/pkg/frpc"
 	"github.com/cbodonnell/tfarm/pkg/handlers"
 	"github.com/cbodonnell/tfarm/pkg/version"
@@ -94,30 +92,10 @@ func Start() error {
 	}
 	a.Start()
 
-	frpcStartErrChan := make(chan error)
-	go func(frpcStartErrChan chan error) {
-		retrySeconds := 5
-		for {
-			creds, err := auth.WaitForCredentials(f.WorkDir)
-			if err != nil {
-				frpcStartErrChan <- fmt.Errorf("error waiting for credentials: %s", err)
-			}
-
-			if err := f.SignConfig(creds); err != nil {
-				frpcStartErrChan <- fmt.Errorf("error signing frpc config: %s", err)
-			}
-
-			f.StartAndWait()
-
-			err = <-f.ErrChan
-			log.Printf("frpc exited: %s", err)
-			log.Printf("restarting frpc in %d seconds", retrySeconds)
-			time.Sleep(time.Duration(retrySeconds) * time.Second)
-		}
-	}(frpcStartErrChan)
+	f.StartLoop()
 
 	select {
-	case err := <-frpcStartErrChan:
+	case err := <-f.StartErrChan:
 		return fmt.Errorf("error starting frpc: %s", err)
 	case err := <-a.ErrChan:
 		return fmt.Errorf("api server exited: %s", err)

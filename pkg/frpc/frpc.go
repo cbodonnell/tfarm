@@ -23,14 +23,15 @@ import (
 )
 
 type Frpc struct {
-	binPath    string
-	WorkDir    string
-	stdout     io.Writer
-	stderr     io.Writer
-	cmd        *exec.Cmd
-	ErrChan    chan error
-	ExitChan   chan struct{}
-	restarting bool
+	binPath      string
+	WorkDir      string
+	stdout       io.Writer
+	stderr       io.Writer
+	cmd          *exec.Cmd
+	StartErrChan chan error
+	ErrChan      chan error
+	ExitChan     chan struct{}
+	restarting   bool
 }
 
 type ErrCredentialsNotFound struct {
@@ -43,19 +44,48 @@ func (e *ErrCredentialsNotFound) Error() string {
 
 func New(binPath, workDir string) *Frpc {
 	return &Frpc{
-		binPath:    binPath,
-		WorkDir:    workDir,
-		stdout:     os.Stdout,
-		stderr:     os.Stderr,
-		cmd:        nil,
-		ErrChan:    make(chan error),
-		ExitChan:   make(chan struct{}),
-		restarting: false,
+		binPath:      binPath,
+		WorkDir:      workDir,
+		stdout:       os.Stdout,
+		stderr:       os.Stderr,
+		cmd:          nil,
+		StartErrChan: make(chan error),
+		ErrChan:      make(chan error),
+		ExitChan:     make(chan struct{}),
+		restarting:   false,
 	}
 }
 
 func (f *Frpc) IsCmd() bool {
 	return f.cmd != nil
+}
+
+func (f *Frpc) StartLoop() {
+	go func() {
+		retrySeconds := 1
+		for {
+			creds, err := auth.WaitForCredentials(f.WorkDir)
+			if err != nil {
+				f.StartErrChan <- fmt.Errorf("error waiting for credentials: %s", err)
+			}
+
+			if err := f.SignConfig(creds); err != nil {
+				f.StartErrChan <- fmt.Errorf("error signing frpc config: %s", err)
+			}
+
+			f.StartAndWait()
+
+			select {
+			case err = <-f.ErrChan:
+				log.Printf("frpc exited: %s", err)
+				log.Printf("restarting frpc in %d seconds", retrySeconds)
+				time.Sleep(time.Duration(retrySeconds) * time.Second)
+				if retrySeconds < 60 {
+					retrySeconds *= 2
+				}
+			}
+		}
+	}()
 }
 
 func (f *Frpc) SignConfig(creds *auth.ConfigureCredentials) error {
