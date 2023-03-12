@@ -58,9 +58,9 @@ Configure the tfarm server with the client credentials, where `$RANCH_CLIENT` is
 tfarm ranch clients get $RANCH_CLIENT --credentials | tfarm configure --credentials-stdin
 ```
 
-### Manage tunnels with the tfarm client
+### Manage tunnels with the tfarm CLI
 
-Once the tfarm server is running, you can use the tfarm client to manage tunnels.
+Once the tfarm server is running, you can use the tfarm CLI to manage tunnels.
 
 #### Validate that the tfarm server is running
 
