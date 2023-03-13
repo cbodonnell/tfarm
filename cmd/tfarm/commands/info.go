@@ -26,6 +26,11 @@ func InfoCmd() *cobra.Command {
 }
 
 func Info(outputFormat string) error {
+	client, err := getClient()
+	if err != nil {
+		return fmt.Errorf("error creating client: %s", err)
+	}
+
 	info, err := client.Info()
 	if err != nil {
 		return fmt.Errorf("error getting info: %s", err)

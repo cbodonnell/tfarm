@@ -37,6 +37,11 @@ func Create(name string, tunnelType string, localIP string, localPort int) error
 		return fmt.Errorf("local port is required")
 	}
 
+	client, err := getClient()
+	if err != nil {
+		return fmt.Errorf("error creating client: %s", err)
+	}
+
 	req := &api.CreateRequest{
 		Name:      name,
 		Type:      tunnelType,

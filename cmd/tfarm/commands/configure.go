@@ -67,6 +67,11 @@ func Configure(clientID, clientSecret string, credentialsStdin bool) error {
 		return errors.New("client secret is required")
 	}
 
+	client, err := getClient()
+	if err != nil {
+		return fmt.Errorf("error creating client: %s", err)
+	}
+
 	status, err := client.Configure(credentials)
 	if err != nil {
 		return fmt.Errorf("error creating: %s", err)

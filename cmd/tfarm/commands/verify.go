@@ -22,6 +22,11 @@ func VerifyCmd() *cobra.Command {
 }
 
 func Verify() error {
+	client, err := getClient()
+	if err != nil {
+		return fmt.Errorf("error creating client: %s", err)
+	}
+
 	req := &api.APIRequest{}
 	status, err := client.Verify(req)
 	if err != nil {

@@ -22,6 +22,11 @@ func ReloadCmd() *cobra.Command {
 }
 
 func Reload() error {
+	client, err := getClient()
+	if err != nil {
+		return fmt.Errorf("error creating client: %s", err)
+	}
+
 	req := &api.APIRequest{}
 	status, err := client.Reload(req)
 	if err != nil {

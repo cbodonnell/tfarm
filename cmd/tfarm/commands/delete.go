@@ -25,6 +25,11 @@ func DeleteCmd() *cobra.Command {
 }
 
 func Delete(name string) error {
+	client, err := getClient()
+	if err != nil {
+		return fmt.Errorf("error creating client: %s", err)
+	}
+
 	req := &api.DeleteRequest{
 		Name: name,
 	}

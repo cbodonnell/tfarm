@@ -22,6 +22,11 @@ func RestartCmd() *cobra.Command {
 }
 
 func Restart() error {
+	client, err := getClient()
+	if err != nil {
+		return fmt.Errorf("error creating client: %s", err)
+	}
+
 	req := &api.APIRequest{}
 	status, err := client.Restart(req)
 	if err != nil {

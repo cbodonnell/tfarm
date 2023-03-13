@@ -43,18 +43,21 @@ func RootCmd() *cobra.Command {
 	return rootCmd
 }
 
-// client is the API client used by all commands
-var client *api.APIClient
-var configDir string
-
 func InitAndExecute() {
+
+	if err := RootCmd().Execute(); err != nil {
+		os.Exit(1)
+	}
+}
+
+func getClient() (*api.APIClient, error) {
 	endpoint := os.Getenv("TFARM_API_ENDPOINT")
 	if endpoint == "" {
 		endpoint = api.DefaultEndpoint
 	}
 
 	// TODO: make this configurable through a config file (like ~/.tfarm/tls/)
-	configDir = os.Getenv("TFARM_CONFIG_DIR")
+	configDir := os.Getenv("TFARM_CONFIG_DIR")
 	if configDir == "" {
 		// get the user's home directory
 		home, err := os.UserHomeDir()
@@ -65,14 +68,10 @@ func InitAndExecute() {
 		configDir = path.Join(home, ".tfarm")
 	}
 
-	newClient, err := api.NewClient(endpoint, configDir)
+	client, err := api.NewClient(endpoint, configDir)
 	if err != nil {
 		log.Fatalf("error creating API client: %s", err)
 	}
 
-	client = newClient
-
-	if err := RootCmd().Execute(); err != nil {
-		os.Exit(1)
-	}
+	return client, nil
 }
