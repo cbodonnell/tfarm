@@ -260,49 +260,26 @@ func (f *Frpc) Status() ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read http response error: %s", err)
 	}
-	res := &client.StatusResp{}
+	res := client.StatusResp{}
 	err = json.Unmarshal(body, &res)
 	if err != nil {
 		return nil, fmt.Errorf("parse http response error: %s", err)
 	}
 
 	buf := new(bytes.Buffer)
-	tbl := table.New("Name", "Type", "Status", "LocalAddr", "Plugin", "RemoteAddr", "Error").WithWriter(buf)
+	tbl := table.New("Name", "Type", "Status", "Local", "Remote", "Error").WithWriter(buf)
 
-	if len(res.TCP) > 0 {
-		for _, ps := range res.TCP {
-			tbl.AddRow(ps.Name, "TCP", ps.Status, ps.LocalAddr, ps.Plugin, ps.RemoteAddr, ps.Err)
-		}
-	}
-	if len(res.UDP) > 0 {
-		for _, ps := range res.UDP {
-			tbl.AddRow(ps.Name, "UDP", ps.Status, ps.LocalAddr, ps.Plugin, ps.RemoteAddr, ps.Err)
-		}
-	}
-	if len(res.HTTP) > 0 {
-		for _, ps := range res.HTTP {
-			if ps.RemoteAddr != "" {
-				ps.RemoteAddr = fmt.Sprintf("http://%s", ps.RemoteAddr)
+	for k, v := range res {
+		for _, ps := range v {
+			if k == "http" || k == "https" {
+				if ps.LocalAddr != "" {
+					ps.LocalAddr = fmt.Sprintf("%s://%s", k, ps.LocalAddr)
+				}
+				if ps.RemoteAddr != "" {
+					ps.RemoteAddr = fmt.Sprintf("%s://%s", k, ps.RemoteAddr)
+				}
 			}
-			tbl.AddRow(ps.Name, "HTTP", ps.Status, ps.LocalAddr, ps.Plugin, ps.RemoteAddr, ps.Err)
-		}
-	}
-	if len(res.HTTPS) > 0 {
-		for _, ps := range res.HTTPS {
-			if ps.RemoteAddr != "" {
-				ps.RemoteAddr = fmt.Sprintf("https://%s", ps.RemoteAddr)
-			}
-			tbl.AddRow(ps.Name, "HTTPS", ps.Status, ps.LocalAddr, ps.Plugin, ps.RemoteAddr, ps.Err)
-		}
-	}
-	if len(res.STCP) > 0 {
-		for _, ps := range res.STCP {
-			tbl.AddRow(ps.Name, "STCP", ps.Status, ps.LocalAddr, ps.Plugin, ps.RemoteAddr, ps.Err)
-		}
-	}
-	if len(res.XTCP) > 0 {
-		for _, ps := range res.XTCP {
-			tbl.AddRow(ps.Name, "XTCP", ps.Status, ps.LocalAddr, ps.Plugin, ps.RemoteAddr, ps.Err)
+			tbl.AddRow(ps.Name, ps.Type, ps.Status, ps.LocalAddr, ps.RemoteAddr, ps.Err)
 		}
 	}
 
