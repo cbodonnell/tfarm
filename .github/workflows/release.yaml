@@ -1,0 +1,36 @@
+# create a github action that on release, builds, tests and publishes the artifacts to github
+on: 
+  release:
+    types: [created]
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GORELEASER_CURRENT_TAG: ${{ github.ref }}
+          GORELEASER_GIT_USERNAME: ${{ github.actor }}
+          GORELEASER_GIT_EMAIL: ${{ github.actor }}@users.noreply.github.com
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./dist/tfarm_{{ .Os }}_{{ .Arch }}.tar.gz
+          asset_name: tfarm_{{ .Os }}_{{ .Arch }}.tar.gz
+          asset_content_type: application/gzip

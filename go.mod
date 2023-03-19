@@ -1,6 +1,6 @@
 module github.com/cbodonnell/tfarm
 
-go 1.19
+go 1.20
 
 require (
 	github.com/cbodonnell/oauth2utils v0.3.1

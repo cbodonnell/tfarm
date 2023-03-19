@@ -6,7 +6,7 @@ ifneq ($(shell git status --porcelain),)
 endif
 
 clean:
-	rm -rf ./bin/*
+	rm -rf ./bin/* ./dist/*
 
 tfarm:
 	go build \
@@ -39,3 +39,9 @@ tfarm-server-certs-regenerate:
 
 trivy-fs:
 	trivy fs --scanners vuln --ignore-unfixed .
+
+release:
+	goreleaser release -f ./deploy/.goreleaser.yaml
+
+release-snapshot:
+	goreleaser release -f ./deploy/.goreleaser.yaml --snapshot

@@ -1,8 +1,9 @@
 # System
 .DS_Store
 
-# Binaries
+# Builds
 bin/
+dist/
 
 # Work Dir
 tfarmd-*work-dir/

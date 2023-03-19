@@ -47,7 +47,7 @@ func Start() error {
 
 	frpcBinPath := os.Getenv("TFARMD_FRPC_BIN_PATH")
 	if frpcBinPath == "" {
-		frpcBinPath = "/usr/bin/frpc"
+		frpcBinPath = "/usr/local/bin/frpc"
 	}
 
 	if _, err := os.Stat(frpcBinPath); os.IsNotExist(err) {
@@ -56,7 +56,7 @@ func Start() error {
 
 	workDir := os.Getenv("TFARMD_WORK_DIR")
 	if workDir == "" {
-		workDir = "/var/lib/tfarmd"
+		workDir = "/var/lib/tfarm"
 	}
 
 	if _, err := os.Stat(workDir); os.IsNotExist(err) {
