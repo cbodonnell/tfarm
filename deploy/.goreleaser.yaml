@@ -1,10 +1,12 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
-# Make sure to check the documentation at https://goreleaser.com
+project_name: tfarm
+release:
+  github:
+    owner: cbodonnell
+    name: tfarm
+  prerelease: "true"
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod tidy
-    # you may remove this if you don't need go generate
     - go generate ./...
 builds:
   - env:
@@ -21,8 +23,8 @@ builds:
     main: ./cmd/tfarm/main.go
     ldflags: -s -w
       -X github.com/cbodonnell/tfarm/pkg/version.Version={{.Version}}
-      -X github.com/cbodonnell/tfarm/pkg/version.GitSHA={{.FullCommit}}
-      -X github.com/cbodonnell/tfarm/pkg/version.BuildTime={{.Date}}
+      # -X github.com/cbodonnell/tfarm/pkg/version.GitSHA={{.FullCommit}}
+      # -X github.com/cbodonnell/tfarm/pkg/version.BuildTime={{.Date}}
 
 archives:
   - format: tar.gz
