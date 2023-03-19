@@ -41,7 +41,7 @@ trivy-fs:
 	trivy fs --scanners vuln --ignore-unfixed .
 
 release: clean
-	goreleaser release -f ./deploy/.goreleaser.yaml
+	goreleaser release -f ./deploy/.goreleaser.yaml --clean
 
 release-snapshot: clean
 	goreleaser release -f ./deploy/.goreleaser.yaml --snapshot
