@@ -13,7 +13,7 @@ tfarm:
 	-ldflags="-X 'github.com/cbodonnell/tfarm/pkg/version.Version=${VERSION}'" \
 	-o ./bin/tfarm ./cmd/tfarm/main.go
 
-tfarm-server-start:
+tfarm-server-start: tfarm
 	TFARMD_FRPC_BIN_PATH=${TFARMD_FRPC_BIN_PATH} \
 	TFARMD_WORK_DIR=${TFARMD_WORK_DIR} \
 	TFARMD_LOG_LEVEL=${TFARMD_LOG_LEVEL} \
@@ -22,26 +22,26 @@ tfarm-server-start:
 		--frps-server-port=7000 \
 		--frpc-log-level ${TFARMD_LOG_LEVEL}
 
-tfarm-server-start-dev:
+tfarm-server-start-dev: tfarm
 	TFARMD_FRPC_BIN_PATH=${TFARMD_FRPC_BIN_PATH} \
 	TFARMD_WORK_DIR=${TFARMD_DEV_WORK_DIR} \
 	TFARMD_LOG_LEVEL=${TFARMD_LOG_LEVEL} \
 	./bin/tfarm server start \
 		--frpc-log-level ${TFARMD_LOG_LEVEL}
 
-tfarm-server-configure-dev:
+tfarm-server-configure-dev: tfarm
 	TFARMD_WORK_DIR=${TFARMD_DEV_WORK_DIR} \
 	./bin/tfarm server configure
 
-tfarm-server-certs-regenerate:
+tfarm-server-certs-regenerate: tfarm
 	TFARMD_WORK_DIR=${TFARMD_WORK_DIR} \
 	./bin/tfarm server certs regenerate
 
 trivy-fs:
 	trivy fs --scanners vuln --ignore-unfixed .
 
-release:
+release: clean
 	goreleaser release -f ./deploy/.goreleaser.yaml
 
-release-snapshot:
+release-snapshot: clean
 	goreleaser release -f ./deploy/.goreleaser.yaml --snapshot
