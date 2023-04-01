@@ -73,11 +73,10 @@ func Start() error {
 	}
 	cfg.Token = frpsToken
 
-	if err := frpc.SaveFrpcCommonConfig(cfg, path.Join(workDir, "frpc.ini")); err != nil {
-		return fmt.Errorf("error saving frpc config: %s", err)
+	f, err := frpc.New(frpcBinPath, workDir, cfg)
+	if err != nil {
+		return fmt.Errorf("error setting up frpc: %s", err)
 	}
-
-	f := frpc.New(frpcBinPath, workDir)
 
 	h := handlers.NewMuxHandler(f)
 	tls := &api.TLSFiles{

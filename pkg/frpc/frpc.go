@@ -42,7 +42,15 @@ func (e *ErrCredentialsNotFound) Error() string {
 	return fmt.Sprintf("credentials not found: %s", e.Err)
 }
 
-func New(binPath, workDir string) *Frpc {
+func New(binPath, workDir string, cfg config.ClientCommonConf) (*Frpc, error) {
+	if err := SaveFrpcCommonConfig(cfg, path.Join(workDir, "frpc.ini")); err != nil {
+		return nil, fmt.Errorf("error saving frpc config: %s", err)
+	}
+
+	if err := os.MkdirAll(path.Join(workDir, "conf.d"), 0755); err != nil {
+		return nil, fmt.Errorf("error creating conf.d directory: %s", err)
+	}
+
 	return &Frpc{
 		binPath:      binPath,
 		WorkDir:      workDir,
@@ -53,7 +61,7 @@ func New(binPath, workDir string) *Frpc {
 		ErrChan:      make(chan error),
 		ExitChan:     make(chan struct{}),
 		restarting:   false,
-	}
+	}, nil
 }
 
 func (f *Frpc) IsCmd() bool {
