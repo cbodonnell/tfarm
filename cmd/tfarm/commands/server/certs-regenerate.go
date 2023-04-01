@@ -34,7 +34,11 @@ func init() {
 func CertsRegenerate() error {
 	workDir := os.Getenv("TFARMD_WORK_DIR")
 	if workDir == "" {
-		workDir = "/var/lib/tfarmd"
+		pwd, err := os.Getwd()
+		if err != nil {
+			return fmt.Errorf("error getting current working directory: %s", err)
+		}
+		workDir = pwd
 	}
 
 	fmt.Println("Generating CA certificate...")

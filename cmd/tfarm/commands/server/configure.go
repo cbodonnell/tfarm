@@ -38,7 +38,11 @@ func ConfigureCmd() *cobra.Command {
 func Configure(clientID, clientSecret string, credentialsStdin bool) error {
 	workDir := os.Getenv("TFARMD_WORK_DIR")
 	if workDir == "" {
-		workDir = "/var/lib/tfarmd"
+		pwd, err := os.Getwd()
+		if err != nil {
+			return fmt.Errorf("error getting current working directory: %s", err)
+		}
+		workDir = pwd
 	}
 
 	credentials := &auth.ConfigureCredentials{}

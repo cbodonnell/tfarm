@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path"
 
 	"github.com/cbodonnell/tfarm/pkg/api"
@@ -47,7 +48,11 @@ func Start() error {
 
 	frpcBinPath := os.Getenv("TFARMD_FRPC_BIN_PATH")
 	if frpcBinPath == "" {
-		frpcBinPath = "/usr/local/bin/frpc"
+		userFrpcPath, err := exec.LookPath("frpc")
+		if err != nil {
+			return fmt.Errorf("error looking for frpc binary in $PATH: %s", err)
+		}
+		frpcBinPath = userFrpcPath
 	}
 
 	if _, err := os.Stat(frpcBinPath); os.IsNotExist(err) {
@@ -56,7 +61,11 @@ func Start() error {
 
 	workDir := os.Getenv("TFARMD_WORK_DIR")
 	if workDir == "" {
-		workDir = "/var/lib/tfarm"
+		pwd, err := os.Getwd()
+		if err != nil {
+			return fmt.Errorf("error getting current working directory: %s", err)
+		}
+		workDir = pwd
 	}
 
 	if _, err := os.Stat(workDir); os.IsNotExist(err) {
@@ -79,6 +88,8 @@ func Start() error {
 	}
 
 	h := handlers.NewMuxHandler(f)
+
+	// TODO: check if tls files exist and if not, generate them
 	tls := &api.TLSFiles{
 		CertFile: path.Join(workDir, "tls", "server.crt"),
 		KeyFile:  path.Join(workDir, "tls", "server.key"),
