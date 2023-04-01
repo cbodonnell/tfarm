@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/cbodonnell/oauth2utils/pkg/utils"
 	"github.com/cbodonnell/tfarm/pkg/ranch/api"
@@ -32,9 +31,8 @@ func ClientsDeleteCmd(tokenDir string) *cobra.Command {
 }
 
 func ClientsDelete(tokenDir, id string) error {
-	_, err := strconv.Atoi(id)
-	if err != nil {
-		return fmt.Errorf("invalid client id: %s", err)
+	if id == "" {
+		return fmt.Errorf("client id is required")
 	}
 
 	ctx := context.Background()
