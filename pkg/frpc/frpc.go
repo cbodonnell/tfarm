@@ -94,7 +94,7 @@ func (f *Frpc) StartLoop() {
 }
 
 func (f *Frpc) SignConfig(creds *auth.ConfigureCredentials) error {
-	decodedSecret, err := base64.StdEncoding.DecodeString(creds.ClientSecret)
+	decodedSecret, err := base64.URLEncoding.DecodeString(creds.ClientSecret)
 	if err != nil {
 		return fmt.Errorf("error decoding client secret: %s", err)
 	}
