@@ -10,6 +10,7 @@ import (
 	"github.com/cbodonnell/tfarm/pkg/api"
 	"github.com/cbodonnell/tfarm/pkg/frpc"
 	"github.com/cbodonnell/tfarm/pkg/handlers"
+	"github.com/cbodonnell/tfarm/pkg/tls"
 	"github.com/cbodonnell/tfarm/pkg/version"
 	"github.com/fatedier/frp/pkg/config"
 	"github.com/spf13/cobra"
@@ -89,7 +90,18 @@ func Start() error {
 
 	h := handlers.NewMuxHandler(f)
 
-	// TODO: check if tls files exist and if not, generate them
+	tlsDir := path.Join(workDir, "tls")
+	if _, err := os.Stat(tlsDir); err != nil {
+		if os.IsNotExist(err) {
+			log.Println("tls directory not found, generating certificates")
+			if err := tls.GenerateCerts(tlsDir); err != nil {
+				return fmt.Errorf("error generating tls certificates: %s", err)
+			}
+		} else {
+			return fmt.Errorf("error checking for tls directory: %s", err)
+		}
+	}
+
 	tls := &api.TLSFiles{
 		CertFile: path.Join(workDir, "tls", "server.crt"),
 		KeyFile:  path.Join(workDir, "tls", "server.key"),
