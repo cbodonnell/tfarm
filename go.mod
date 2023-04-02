@@ -3,7 +3,7 @@ module github.com/cbodonnell/tfarm
 go 1.20
 
 require (
-	github.com/cbodonnell/oauth2utils v0.3.3
+	github.com/cbodonnell/oauth2utils v0.3.4
 	github.com/fatedier/frp v0.48.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
@@ -17,6 +17,7 @@ require (
 require (
 	github.com/Azure/go-ntlmssp v0.0.0-20200615164410-66371956d46c // indirect
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 // indirect
+	github.com/cbodonnell/go-oidc/v3 v3.0.0-20230402151138-e145b78ff15d // indirect
 	github.com/coreos/go-oidc/v3 v3.5.0 // indirect
 	github.com/fatedier/beego v0.0.0-20171024143340-6c6a4f5bd5eb // indirect
 	github.com/fatedier/golib v0.1.1-0.20220321042308-c306138b83ac // indirect
@@ -57,6 +58,3 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 )
-
-// TODO: remove this replace once there is a better way to handle device flow
-replace github.com/coreos/go-oidc/v3 => github.com/cbodonnell/go-oidc/v3 v3.0.0-20230209024550-31e4e2bd7e6e
