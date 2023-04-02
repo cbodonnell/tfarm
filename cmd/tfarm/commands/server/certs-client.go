@@ -17,6 +17,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TODO: This is deprecated, update it to use the refactored certs package once it's done
 var certsClientCmd = &cobra.Command{
 	Use:           "client [name]",
 	Short:         "Generate a client certificate",
@@ -52,6 +53,7 @@ func CertsClient(name string) error {
 	if err != nil {
 		return fmt.Errorf("error opening CA key file: %s", err)
 	}
+	defer caKeyFile.Close()
 	caKeyPEM, err := io.ReadAll(caKeyFile)
 	if err != nil {
 		return fmt.Errorf("error reading CA key file: %s", err)
@@ -66,6 +68,7 @@ func CertsClient(name string) error {
 	if err != nil {
 		return fmt.Errorf("error opening CA file: %s", err)
 	}
+	defer caFile.Close()
 	caCertPEM, err := io.ReadAll(caFile)
 	if err != nil {
 		return fmt.Errorf("error reading CA file: %s", err)
@@ -106,15 +109,14 @@ func CertsClient(name string) error {
 		return fmt.Errorf("error creating clients directory: %s", err)
 	}
 
-	// Write the client certificate and key to files
-	certFile, err := os.Create(path.Join(workDir, "tls", "clients", name, "client.crt"))
+	certFile, err := os.OpenFile(path.Join(workDir, "tls", "clients", name, "client.crt"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return fmt.Errorf("error creating client certificate file: %s", err)
 	}
 	pem.Encode(certFile, &pem.Block{Type: "CERTIFICATE", Bytes: clientCert})
 	certFile.Close()
 
-	keyFile, err := os.Create(path.Join(workDir, "tls", "clients", name, "client.key"))
+	keyFile, err := os.OpenFile(path.Join(workDir, "tls", "clients", name, "client.key"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return fmt.Errorf("error creating client key file: %s", err)
 	}

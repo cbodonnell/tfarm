@@ -50,7 +50,7 @@ func HandleDelete(f *frpc.Frpc) func(w http.ResponseWriter, r *http.Request) {
 
 		if _, err = f.Output("reload"); err != nil {
 			log.Printf("failed to reload: %s", err)
-			if err := ioutil.WriteFile(tunnelConfigPath, tunnelConfig, 0644); err != nil {
+			if err := ioutil.WriteFile(tunnelConfigPath, tunnelConfig, 0600); err != nil {
 				log.Printf("failed to restore tunnel config file: %s", err)
 			}
 			api.RespondWithError(w, http.StatusInternalServerError, "failed to reload")

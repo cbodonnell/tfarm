@@ -3,7 +3,7 @@ module github.com/cbodonnell/tfarm
 go 1.20
 
 require (
-	github.com/cbodonnell/oauth2utils v0.3.1
+	github.com/cbodonnell/oauth2utils v0.3.3
 	github.com/fatedier/frp v0.48.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0

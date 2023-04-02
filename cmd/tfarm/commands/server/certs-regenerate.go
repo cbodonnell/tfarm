@@ -5,7 +5,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/cbodonnell/tfarm/pkg/tls"
+	"github.com/cbodonnell/tfarm/pkg/certs"
 	"github.com/spf13/cobra"
 )
 
@@ -33,5 +33,5 @@ func CertsRegenerate() error {
 		workDir = pwd
 	}
 
-	return tls.GenerateCerts(path.Join(workDir, "tls"))
+	return certs.GenerateCerts(path.Join(workDir, "tls"))
 }

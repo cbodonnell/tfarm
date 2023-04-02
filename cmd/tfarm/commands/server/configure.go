@@ -83,7 +83,7 @@ func Configure(clientID, clientSecret string, credentialsStdin bool) error {
 		return fmt.Errorf("error marshaling credentials: %s", err)
 	}
 
-	if err := os.WriteFile(credPath, credBytes, 0644); err != nil {
+	if err := os.WriteFile(credPath, credBytes, 0600); err != nil {
 		return fmt.Errorf("error writing credentials: %s", err)
 	}
 

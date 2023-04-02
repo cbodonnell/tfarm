@@ -83,7 +83,7 @@ func SaveFrpcCommonConfig(common config.ClientCommonConf, path string) error {
 	}
 
 	// save to file
-	err = os.WriteFile(path, buf.Bytes(), 0644)
+	err = os.WriteFile(path, buf.Bytes(), 0600)
 	if err != nil {
 		return fmt.Errorf("failed to write file: %s", err)
 	}

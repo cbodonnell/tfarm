@@ -7,8 +7,8 @@ github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 h1:0CwZNZbxp69SHPd
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkYZB8zMSxRWpUBQtwG5a7fFgvEO+odwuTv2gs=
 github.com/cbodonnell/go-oidc/v3 v3.0.0-20230209024550-31e4e2bd7e6e h1:2kJIifsYG3Wi4rL/7y2AcPuD6isU+FHQw+K6xU1Tas4=
 github.com/cbodonnell/go-oidc/v3 v3.0.0-20230209024550-31e4e2bd7e6e/go.mod h1:ecXRtV4romGPeO6ieExAsUK9cb/3fp9hXNz1tlv8PIM=
-github.com/cbodonnell/oauth2utils v0.3.1 h1:BJUL+UJIOwsuuS9JKmIwde8y1YX6Xiti1Sg+m2f/zS4=
-github.com/cbodonnell/oauth2utils v0.3.1/go.mod h1:9KpBXO1Pv142BAjs316bRfQXSI3txRKGaEkNxHa/E+k=
+github.com/cbodonnell/oauth2utils v0.3.3 h1:o5Q5IeJP2uvvM3c/6jiYjDPYZTZ4oxjFU1ovQjc90sA=
+github.com/cbodonnell/oauth2utils v0.3.3/go.mod h1:9KpBXO1Pv142BAjs316bRfQXSI3txRKGaEkNxHa/E+k=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=

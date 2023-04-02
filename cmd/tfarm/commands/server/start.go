@@ -8,9 +8,9 @@ import (
 	"path"
 
 	"github.com/cbodonnell/tfarm/pkg/api"
+	"github.com/cbodonnell/tfarm/pkg/certs"
 	"github.com/cbodonnell/tfarm/pkg/frpc"
 	"github.com/cbodonnell/tfarm/pkg/handlers"
-	"github.com/cbodonnell/tfarm/pkg/tls"
 	"github.com/cbodonnell/tfarm/pkg/version"
 	"github.com/fatedier/frp/pkg/config"
 	"github.com/spf13/cobra"
@@ -94,7 +94,7 @@ func Start() error {
 	if _, err := os.Stat(tlsDir); err != nil {
 		if os.IsNotExist(err) {
 			log.Println("tls directory not found, generating certificates")
-			if err := tls.GenerateCerts(tlsDir); err != nil {
+			if err := certs.GenerateCerts(tlsDir); err != nil {
 				return fmt.Errorf("error generating tls certificates: %s", err)
 			}
 		} else {

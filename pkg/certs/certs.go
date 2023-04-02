@@ -1,6 +1,7 @@
-package tls
+package certs
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -15,6 +16,7 @@ import (
 	"time"
 )
 
+// TODO: Split this into a CA, server, and client cert generator
 func GenerateCerts(dir string) error {
 	fmt.Println("Generating CA certificate...")
 
@@ -46,20 +48,24 @@ func GenerateCerts(dir string) error {
 	}
 
 	// Write the CA key to a file
-	caKeyFile, err := os.Create(path.Join(dir, "ca.key"))
+	caKeyFile, err := os.OpenFile(path.Join(dir, "ca.key"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return fmt.Errorf("error creating CA key file: %s", err)
 	}
-	pem.Encode(caKeyFile, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(caKey)})
-	caKeyFile.Close()
+	defer caKeyFile.Close()
+	if err := pem.Encode(caKeyFile, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(caKey)}); err != nil {
+		return fmt.Errorf("error writing CA key file: %s", err)
+	}
 
 	// Write the CA certificate to a file
-	caFile, err := os.Create(path.Join(dir, "ca.crt"))
+	caFile, err := os.OpenFile(path.Join(dir, "ca.crt"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return fmt.Errorf("error creating CA file: %s", err)
 	}
-	pem.Encode(caFile, &pem.Block{Type: "CERTIFICATE", Bytes: caCert})
-	caFile.Close()
+	defer caFile.Close()
+	if err := pem.Encode(caFile, &pem.Block{Type: "CERTIFICATE", Bytes: caCert}); err != nil {
+		return fmt.Errorf("error writing CA file: %s", err)
+	}
 
 	fmt.Println("Generating server certificate...")
 
@@ -89,19 +95,23 @@ func GenerateCerts(dir string) error {
 	}
 
 	// Write the server certificate and key to files
-	certFile, err := os.Create(path.Join(dir, "server.crt"))
+	certFile, err := os.OpenFile(path.Join(dir, "server.crt"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return fmt.Errorf("error creating server certificate file: %s", err)
 	}
-	pem.Encode(certFile, &pem.Block{Type: "CERTIFICATE", Bytes: serverCert})
-	certFile.Close()
+	defer certFile.Close()
+	if err := pem.Encode(certFile, &pem.Block{Type: "CERTIFICATE", Bytes: serverCert}); err != nil {
+		return fmt.Errorf("error writing server certificate file: %s", err)
+	}
 
-	keyFile, err := os.Create(path.Join(dir, "server.key"))
+	keyFile, err := os.OpenFile(path.Join(dir, "server.key"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return fmt.Errorf("error creating server key file: %s", err)
 	}
-	pem.Encode(keyFile, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(serverKey)})
-	keyFile.Close()
+	defer keyFile.Close()
+	if err := pem.Encode(keyFile, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(serverKey)}); err != nil {
+		return fmt.Errorf("error writing server key file: %s", err)
+	}
 
 	fmt.Println("Generating admin client certificate...")
 
@@ -129,20 +139,29 @@ func GenerateCerts(dir string) error {
 		return fmt.Errorf("error generating client certificate: %s", err)
 	}
 
-	// Write the client certificate and key to files
-	certFile, err = os.Create(path.Join(dir, "admin.crt"))
-	if err != nil {
-		return fmt.Errorf("error creating client certificate file: %s", err)
+	caBuff := bytes.NewBuffer(nil)
+	if err := pem.Encode(caBuff, &pem.Block{Type: "CERTIFICATE", Bytes: caCert}); err != nil {
+		return fmt.Errorf("error encoding CA certificate: %s", err)
 	}
-	pem.Encode(certFile, &pem.Block{Type: "CERTIFICATE", Bytes: clientCert})
-	certFile.Close()
 
-	keyFile, err = os.Create(path.Join(dir, "admin.key"))
-	if err != nil {
-		return fmt.Errorf("error creating client key file: %s", err)
+	certBuff := bytes.NewBuffer(nil)
+	if err := pem.Encode(certBuff, &pem.Block{Type: "CERTIFICATE", Bytes: clientCert}); err != nil {
+		return fmt.Errorf("error encoding client certificate: %s", err)
 	}
-	pem.Encode(keyFile, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(clientKey)})
-	keyFile.Close()
+
+	keyBuff := bytes.NewBuffer(nil)
+	if err := pem.Encode(keyBuff, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(clientKey)}); err != nil {
+		return fmt.Errorf("error encoding client key: %s", err)
+	}
+
+	client := &Client{
+		CA:   caBuff.Bytes(),
+		Cert: certBuff.Bytes(),
+		Key:  keyBuff.Bytes(),
+	}
+	if err := client.SaveToFile(path.Join(dir, "client.json")); err != nil {
+		return fmt.Errorf("error saving client to file: %s", err)
+	}
 
 	absPath, err := filepath.Abs(dir)
 	if err != nil {

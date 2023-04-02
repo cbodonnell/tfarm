@@ -11,6 +11,7 @@ import (
 	"path"
 
 	"github.com/cbodonnell/tfarm/pkg/auth"
+	"github.com/cbodonnell/tfarm/pkg/certs"
 	"github.com/cbodonnell/tfarm/pkg/version"
 )
 
@@ -50,25 +51,17 @@ type DeleteRequest struct {
 }
 
 func NewClient(endpoint string, configDir string) (*APIClient, error) {
-	tlsFiles := &TLSFiles{
-		CertFile: path.Join(configDir, "tls", "client.crt"),
-		KeyFile:  path.Join(configDir, "tls", "client.key"),
-		CAFile:   path.Join(configDir, "tls", "ca.crt"),
+	client, err := certs.LoadClientFromFile(path.Join(configDir, "client.json"))
+	if err != nil {
+		return nil, fmt.Errorf("failed to load client: %s", err)
 	}
 
-	// Load the server certificate and key
-	cert, err := tls.LoadX509KeyPair(tlsFiles.CertFile, tlsFiles.KeyFile)
+	cert, err := tls.X509KeyPair(client.Cert, client.Key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load key pair: %s", err)
 	}
-
-	// Load the CA certificate
-	caCert, err := ioutil.ReadFile(tlsFiles.CAFile)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read ca cert: %s", err)
-	}
 	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
+	caCertPool.AppendCertsFromPEM(client.CA)
 
 	// Create a TLS configuration with the server certificate/key and CA certificate
 	tlsConfig := &tls.Config{

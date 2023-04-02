@@ -49,7 +49,7 @@ func HandleCreate(f *frpc.Frpc) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := os.WriteFile(tunnelConfigPath, tunnelConfig.Bytes(), 0644); err != nil {
+		if err := os.WriteFile(tunnelConfigPath, tunnelConfig.Bytes(), 0600); err != nil {
 			log.Printf("failed to write tunnel config: %s", err)
 			api.RespondWithError(w, http.StatusInternalServerError, "failed to write tunnel config")
 			return

@@ -37,7 +37,7 @@ func HandleConfigure(f *frpc.Frpc) func(w http.ResponseWriter, r *http.Request) 
 		}
 
 		// write configure request to file
-		if err := os.WriteFile(path.Join(f.WorkDir, "credentials.json"), configureCredentialsJSON, 0644); err != nil {
+		if err := os.WriteFile(path.Join(f.WorkDir, "credentials.json"), configureCredentialsJSON, 0600); err != nil {
 			log.Printf("failed to write configure request to file: %s", err)
 			api.RespondWithError(w, http.StatusInternalServerError, "failed to write configure request to file")
 			return
