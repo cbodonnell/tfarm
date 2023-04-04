@@ -43,6 +43,8 @@ func HandleConfigure(f *frpc.Frpc) func(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
+		// TODO: re-sign the frpc.ini file and restart frpc
+
 		api.RespondWithSuccess(w, "tfarmd configured")
 	}
 }
