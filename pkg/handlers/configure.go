@@ -43,7 +43,17 @@ func HandleConfigure(f *frpc.Frpc) func(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		// TODO: re-sign the frpc.ini file and restart frpc
+		if err := f.SignConfig(configureCredentials); err != nil {
+			log.Printf("failed to sign frpc config: %s", err)
+			api.RespondWithError(w, http.StatusInternalServerError, "failed to sign frpc config")
+			return
+		}
+
+		if err := f.Restart(); err != nil {
+			log.Printf("failed to restart frpc: %s", err)
+			api.RespondWithError(w, http.StatusInternalServerError, "failed to restart frpc")
+			return
+		}
 
 		api.RespondWithSuccess(w, "tfarmd configured")
 	}
