@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/cbodonnell/oauth2utils/pkg/utils"
 	"github.com/cbodonnell/tfarm/pkg/ranch/api"
@@ -12,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ClientsDeleteCmd(tokenDir string) *cobra.Command {
+func ClientsDeleteCmd(tokenDir, endpoint string) *cobra.Command {
 	clientsDeleteCmd := &cobra.Command{
 		Use:           "delete [id]",
 		Short:         "Delete a ranch client",
@@ -23,14 +22,14 @@ func ClientsDeleteCmd(tokenDir string) *cobra.Command {
 				cmd.Help()
 				return nil
 			}
-			return ClientsDelete(tokenDir, args[0])
+			return ClientsDelete(tokenDir, endpoint, args[0])
 		},
 	}
 
 	return clientsDeleteCmd
 }
 
-func ClientsDelete(tokenDir, id string) error {
+func ClientsDelete(tokenDir, endpoint, id string) error {
 	if id == "" {
 		return fmt.Errorf("client id is required")
 	}
@@ -44,12 +43,6 @@ func ClientsDelete(tokenDir, id string) error {
 	token := utils.TryGetToken(ctx, oc, tokenDir)
 	if !token.Valid() {
 		return fmt.Errorf("not logged in")
-	}
-
-	// TODO: set this as a higher scope
-	endpoint := os.Getenv("RANCH_API_ENDPOINT")
-	if endpoint == "" {
-		endpoint = "https://api.tunnel.farm"
 	}
 
 	apiClient := api.NewClient(oc.HTTPClient(ctx, token), endpoint)

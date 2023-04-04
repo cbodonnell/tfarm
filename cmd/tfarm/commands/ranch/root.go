@@ -21,8 +21,9 @@ func RootCmd() *cobra.Command {
 	}
 
 	tokenDir := getRanchTokenDir()
+	endpoint := getRanchAPIEndpoint()
 
-	rootCmd.AddCommand(ClientsCmd(tokenDir))
+	rootCmd.AddCommand(ClientsCmd(tokenDir, endpoint))
 	rootCmd.AddCommand(LoginCmd(tokenDir))
 	rootCmd.AddCommand(LogoutCmd(tokenDir))
 
@@ -42,4 +43,13 @@ func getRanchTokenDir() string {
 	}
 
 	return path.Join(configDir, "ranch")
+}
+
+func getRanchAPIEndpoint() string {
+	endpoint := os.Getenv("RANCH_API_ENDPOINT")
+	if endpoint == "" {
+		endpoint = "https://api.tunnel.farm"
+	}
+
+	return endpoint
 }

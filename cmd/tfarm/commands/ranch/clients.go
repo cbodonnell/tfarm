@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ClientsCmd(tokenDir string) *cobra.Command {
+func ClientsCmd(tokenDir, endpoint string) *cobra.Command {
 	clientsCmd := &cobra.Command{
 		Use:           "clients",
 		Short:         "Manage ranch clients",
@@ -17,10 +17,10 @@ func ClientsCmd(tokenDir string) *cobra.Command {
 		},
 	}
 
-	clientsCmd.AddCommand(ClientsCreateCmd(tokenDir))
-	clientsCmd.AddCommand(ClientsDeleteCmd(tokenDir))
-	clientsCmd.AddCommand(ClientsGetCmd(tokenDir))
-	clientsCmd.AddCommand(ClientsListCmd(tokenDir))
+	clientsCmd.AddCommand(ClientsCreateCmd(tokenDir, endpoint))
+	clientsCmd.AddCommand(ClientsDeleteCmd(tokenDir, endpoint))
+	clientsCmd.AddCommand(ClientsGetCmd(tokenDir, endpoint))
+	clientsCmd.AddCommand(ClientsListCmd(tokenDir, endpoint))
 
 	return clientsCmd
 }

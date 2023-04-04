@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/cbodonnell/oauth2utils/pkg/utils"
 	"github.com/cbodonnell/tfarm/pkg/ranch/api"
@@ -12,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ClientsGetCmd(tokenDir string) *cobra.Command {
+func ClientsGetCmd(tokenDir, endpoint string) *cobra.Command {
 	var outCredentials bool
 
 	clientsGetCmd := &cobra.Command{
@@ -25,7 +24,7 @@ func ClientsGetCmd(tokenDir string) *cobra.Command {
 				cmd.Help()
 				return nil
 			}
-			return ClientsGet(tokenDir, args[0], outCredentials)
+			return ClientsGet(tokenDir, endpoint, args[0], outCredentials)
 		},
 	}
 
@@ -34,7 +33,7 @@ func ClientsGetCmd(tokenDir string) *cobra.Command {
 	return clientsGetCmd
 }
 
-func ClientsGet(tokenDir, id string, outCredentials bool) error {
+func ClientsGet(tokenDir, endpoint, id string, outCredentials bool) error {
 	if id == "" {
 		return fmt.Errorf("client id is required")
 	}
@@ -48,12 +47,6 @@ func ClientsGet(tokenDir, id string, outCredentials bool) error {
 	token := utils.TryGetToken(ctx, oc, tokenDir)
 	if !token.Valid() {
 		return fmt.Errorf("not logged in")
-	}
-
-	// TODO: set this as a higher scope
-	endpoint := os.Getenv("RANCH_API_ENDPOINT")
-	if endpoint == "" {
-		endpoint = "https://api.tunnel.farm"
 	}
 
 	apiClient := api.NewClient(oc.HTTPClient(ctx, token), endpoint)

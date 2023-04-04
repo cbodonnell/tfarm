@@ -56,7 +56,6 @@ func getClient() (*api.APIClient, error) {
 		endpoint = api.DefaultEndpoint
 	}
 
-	// TODO: make this configurable through a config file (like ~/.tfarm/tls/)
 	configDir := os.Getenv("TFARM_CONFIG_DIR")
 	if configDir == "" {
 		// get the user's home directory
