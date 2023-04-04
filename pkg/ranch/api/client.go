@@ -111,7 +111,7 @@ func (c *APIClient) GetClientCredentialsJson(params *ClientRequestParams) ([]byt
 	return b, nil
 }
 
-func (c *APIClient) CreateClient(params *APIRequestParams) ([]byte, error) {
+func (c *APIClient) CreateClient(params *APIRequestParams) (*ClientResponse, error) {
 	resp, err := c.httpClient.Post(c.endpoint+"/api/clients", "application/json", nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating client: %w", err)
@@ -122,12 +122,12 @@ func (c *APIClient) CreateClient(params *APIRequestParams) ([]byte, error) {
 		return nil, fmt.Errorf("unexpected status code: %s", resp.Status)
 	}
 
-	b, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("error reading response body: %w", err)
+	response := &ClientResponse{}
+	if err := json.NewDecoder(resp.Body).Decode(response); err != nil {
+		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
 
-	return b, nil
+	return response, nil
 }
 
 func (c *APIClient) CreateClientJSON(params *APIRequestParams) ([]byte, error) {
