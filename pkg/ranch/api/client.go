@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 
 	"golang.org/x/oauth2"
 )
@@ -20,6 +21,7 @@ type APIClient struct {
 }
 
 type APIRequestParams struct {
+	QueryParams map[string]string
 }
 
 type ClientRequestParams struct {
@@ -109,7 +111,7 @@ func (c *APIClient) GetClientCredentialsJson(params *ClientRequestParams) ([]byt
 	return b, nil
 }
 
-func (c *APIClient) CreateClient(params *APIRequestParams) (*ClientResponse, error) {
+func (c *APIClient) CreateClient(params *APIRequestParams) ([]byte, error) {
 	resp, err := c.httpClient.Post(c.endpoint+"/api/clients", "application/json", nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating client: %w", err)
@@ -120,11 +122,42 @@ func (c *APIClient) CreateClient(params *APIRequestParams) (*ClientResponse, err
 		return nil, fmt.Errorf("unexpected status code: %s", resp.Status)
 	}
 
-	var response ClientResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, fmt.Errorf("error decoding response: %w", err)
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
-	return &response, nil
+
+	return b, nil
+}
+
+func (c *APIClient) CreateClientJSON(params *APIRequestParams) ([]byte, error) {
+	u, err := url.Parse(c.endpoint + "/api/clients")
+	if err != nil {
+		return nil, fmt.Errorf("error parsing url: %w", err)
+	}
+
+	q := u.Query()
+	for k, v := range params.QueryParams {
+		q.Add(k, v)
+	}
+	u.RawQuery = q.Encode()
+
+	resp, err := c.httpClient.Post(u.String(), "application/json", nil)
+	if err != nil {
+		return nil, fmt.Errorf("error creating client: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %s", resp.Status)
+	}
+
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %w", err)
+	}
+
+	return b, nil
 }
 
 func (c *APIClient) DeleteClient(params *ClientRequestParams) (*ClientResponse, error) {

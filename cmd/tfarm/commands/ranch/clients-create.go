@@ -12,20 +12,24 @@ import (
 )
 
 func ClientsCreateCmd(tokenDir, endpoint string) *cobra.Command {
+	var outCredentials bool
+
 	clientsCreateCmd := &cobra.Command{
 		Use:           "create",
 		Short:         "Create a new ranch client",
 		SilenceUsage:  true,
 		SilenceErrors: false,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return ClientsCreate(tokenDir, endpoint)
+			return ClientsCreate(tokenDir, endpoint, outCredentials)
 		},
 	}
+
+	clientsCreateCmd.Flags().BoolVar(&outCredentials, "credentials", false, "output in credentials.json format")
 
 	return clientsCreateCmd
 }
 
-func ClientsCreate(tokenDir, endpoint string) error {
+func ClientsCreate(tokenDir, endpoint string, outCredentials bool) error {
 	ctx := context.Background()
 	oc, err := auth.NewOIDCClient(ctx)
 	if err != nil {
@@ -38,14 +42,28 @@ func ClientsCreate(tokenDir, endpoint string) error {
 	}
 
 	apiClient := api.NewClient(oc.HTTPClient(ctx, token), endpoint)
-	client, err := apiClient.CreateClient(&api.APIRequestParams{})
-	if err != nil {
-		return fmt.Errorf("error creating client: %s", err)
-	}
 
-	b, err := json.Marshal(client)
-	if err != nil {
-		return fmt.Errorf("error marshaling client: %s", err)
+	var b []byte
+	if outCredentials {
+		params := &api.APIRequestParams{
+			QueryParams: map[string]string{
+				"credentials": "true",
+			},
+		}
+		b, err = apiClient.CreateClientJSON(params)
+		if err != nil {
+			return fmt.Errorf("error creating client: %s", err)
+		}
+	} else {
+		client, err := apiClient.CreateClient(&api.APIRequestParams{})
+		if err != nil {
+			return fmt.Errorf("error creating client: %s", err)
+		}
+
+		b, err = json.Marshal(client)
+		if err != nil {
+			return fmt.Errorf("error marshaling client: %s", err)
+		}
 	}
 
 	fmt.Print(string(b))
