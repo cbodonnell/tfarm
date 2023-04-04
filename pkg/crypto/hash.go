@@ -3,7 +3,7 @@ package crypto
 import (
 	"crypto/hmac"
 	"crypto/sha256"
-	"encoding/hex"
+	"encoding/base64"
 )
 
 func HMAC(secret []byte, data ...[]byte) string {
@@ -12,5 +12,5 @@ func HMAC(secret []byte, data ...[]byte) string {
 		h.Write(d)
 	}
 	signature := h.Sum(nil)
-	return hex.EncodeToString(signature)
+	return base64.URLEncoding.EncodeToString(signature)
 }
