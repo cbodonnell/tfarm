@@ -9,18 +9,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var certsRegenerateCmd = &cobra.Command{
-	Use:           "regenerate",
-	Short:         "Regenerate TLS certificates",
-	SilenceUsage:  true,
-	SilenceErrors: false,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return CertsRegenerate()
-	},
-}
+func CertsRegenerateCmd() *cobra.Command {
+	certsRegenerateCmd := &cobra.Command{
+		Use:           "regenerate",
+		Short:         "Regenerate TLS certificates",
+		SilenceUsage:  true,
+		SilenceErrors: false,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return CertsRegenerate()
+		},
+	}
 
-func init() {
-	certsCmd.AddCommand(certsRegenerateCmd)
+	return certsRegenerateCmd
 }
 
 func CertsRegenerate() error {

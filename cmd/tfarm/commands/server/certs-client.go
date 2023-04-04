@@ -17,23 +17,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// TODO: This is deprecated, update it to use the refactored certs package once it's done
-var certsClientCmd = &cobra.Command{
-	Use:           "client [name]",
-	Short:         "Generate a client certificate",
-	SilenceUsage:  true,
-	SilenceErrors: false,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) == 0 {
-			cmd.Help()
-			return nil
-		}
-		return CertsClient(args[0])
-	},
-}
+func CertsClientCmd() *cobra.Command {
+	certsClientCmd := &cobra.Command{
+		Use:           "client [name]",
+		Short:         "Generate a client certificate",
+		SilenceUsage:  true,
+		SilenceErrors: false,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 {
+				cmd.Help()
+				return nil
+			}
+			return CertsClient(args[0])
+		},
+	}
 
-func init() {
-	certsCmd.AddCommand(certsClientCmd)
+	return certsClientCmd
 }
 
 func CertsClient(name string) error {

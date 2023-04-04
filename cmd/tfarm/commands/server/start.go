@@ -16,25 +16,35 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var startCmd = &cobra.Command{
-	Use:           "start",
-	Short:         "Start tfarm server",
-	SilenceUsage:  true,
-	SilenceErrors: false,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return Start()
-	},
-}
+func StartCmd() *cobra.Command {
+	var port int
+	var frpcAdminAddr string
+	var frpcAdminPort int
+	var frpcLogLevel string
+	var frpsServerAddr string
+	var frpsServerPort int
+	var frpsToken string
 
-var port int
-var frpcAdminAddr string
-var frpcAdminPort int
-var frpcLogLevel string
-var frpsServerAddr string
-var frpsServerPort int
-var frpsToken string
+	startCmd := &cobra.Command{
+		Use:           "start",
+		Short:         "Start tfarm server",
+		SilenceUsage:  true,
+		SilenceErrors: false,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cfg := config.ClientCommonConf{
+				ServerAddr: frpsServerAddr,
+				ServerPort: frpsServerPort,
+				AdminAddr:  frpcAdminAddr,
+				AdminPort:  frpcAdminPort,
+				LogLevel:   frpcLogLevel,
+				Metas:      make(map[string]string),
+			}
+			cfg.Token = frpsToken
 
-func init() {
+			return Start(port, cfg)
+		},
+	}
+
 	startCmd.Flags().IntVarP(&port, "port", "p", api.DefaultPort, "port to listen on")
 	startCmd.Flags().StringVar(&frpcAdminAddr, "frpc-admin-addr", "127.0.0.1", "address of frpc admin interface")
 	startCmd.Flags().IntVar(&frpcAdminPort, "frpc-admin-port", 7400, "frpc admin port")
@@ -42,9 +52,11 @@ func init() {
 	startCmd.Flags().StringVar(&frpsServerAddr, "frps-server-addr", "ranch.tunnel.farm", "frps server address")
 	startCmd.Flags().IntVar(&frpsServerPort, "frps-server-port", 30070, "frps server port")
 	startCmd.Flags().StringVar(&frpsToken, "frps-token", "", "frps token")
+
+	return startCmd
 }
 
-func Start() error {
+func Start(port int, cfg config.ClientCommonConf) error {
 	log.Printf("starting tfarmd version %s", version.Version)
 
 	frpcBinPath := os.Getenv("TFARMD_FRPC_BIN_PATH")
@@ -72,16 +84,6 @@ func Start() error {
 	if _, err := os.Stat(workDir); os.IsNotExist(err) {
 		return fmt.Errorf("work directory not found at %s", workDir)
 	}
-
-	cfg := config.ClientCommonConf{
-		ServerAddr: frpsServerAddr,
-		ServerPort: frpsServerPort,
-		AdminAddr:  frpcAdminAddr,
-		AdminPort:  frpcAdminPort,
-		LogLevel:   frpcLogLevel,
-		Metas:      make(map[string]string),
-	}
-	cfg.Token = frpsToken
 
 	f, err := frpc.New(frpcBinPath, workDir, cfg)
 	if err != nil {
