@@ -1,10 +1,11 @@
 package ranch
 
 import (
+	"github.com/cbodonnell/tfarm/pkg/ranch/auth"
 	"github.com/spf13/cobra"
 )
 
-func ClientsCmd(tokenDir, endpoint string) *cobra.Command {
+func ClientsCmd(tokenDir, endpoint string, oidcConfig *auth.OIDCClientConfig) *cobra.Command {
 	clientsCmd := &cobra.Command{
 		Use:           "clients",
 		Short:         "Manage ranch clients",
@@ -17,10 +18,10 @@ func ClientsCmd(tokenDir, endpoint string) *cobra.Command {
 		},
 	}
 
-	clientsCmd.AddCommand(ClientsCreateCmd(tokenDir, endpoint))
-	clientsCmd.AddCommand(ClientsDeleteCmd(tokenDir, endpoint))
-	clientsCmd.AddCommand(ClientsGetCmd(tokenDir, endpoint))
-	clientsCmd.AddCommand(ClientsListCmd(tokenDir, endpoint))
+	clientsCmd.AddCommand(ClientsCreateCmd(tokenDir, endpoint, oidcConfig))
+	clientsCmd.AddCommand(ClientsDeleteCmd(tokenDir, endpoint, oidcConfig))
+	clientsCmd.AddCommand(ClientsGetCmd(tokenDir, endpoint, oidcConfig))
+	clientsCmd.AddCommand(ClientsListCmd(tokenDir, endpoint, oidcConfig))
 
 	return clientsCmd
 }

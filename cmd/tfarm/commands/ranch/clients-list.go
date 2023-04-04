@@ -11,23 +11,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ClientsListCmd(tokenDir, endpoint string) *cobra.Command {
+func ClientsListCmd(tokenDir, endpoint string, oidcConfig *auth.OIDCClientConfig) *cobra.Command {
 	clientsListCmd := &cobra.Command{
 		Use:           "list",
 		Short:         "List ranch clients",
 		SilenceUsage:  true,
 		SilenceErrors: false,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return ClientsList(tokenDir, endpoint)
+			return ClientsList(tokenDir, endpoint, oidcConfig)
 		},
 	}
 
 	return clientsListCmd
 }
 
-func ClientsList(tokenDir, endpoint string) error {
+func ClientsList(tokenDir, endpoint string, oidcConfig *auth.OIDCClientConfig) error {
 	ctx := context.Background()
-	oc, err := auth.NewOIDCClient(ctx)
+	oc, err := auth.NewOIDCClient(ctx, oidcConfig)
 	if err != nil {
 		return fmt.Errorf("error creating OIDC client: %s", err)
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ClientsGetCmd(tokenDir, endpoint string) *cobra.Command {
+func ClientsGetCmd(tokenDir, endpoint string, oidcConfig *auth.OIDCClientConfig) *cobra.Command {
 	var outCredentials bool
 
 	clientsGetCmd := &cobra.Command{
@@ -24,7 +24,7 @@ func ClientsGetCmd(tokenDir, endpoint string) *cobra.Command {
 				cmd.Help()
 				return nil
 			}
-			return ClientsGet(tokenDir, endpoint, args[0], outCredentials)
+			return ClientsGet(tokenDir, endpoint, oidcConfig, args[0], outCredentials)
 		},
 	}
 
@@ -33,13 +33,13 @@ func ClientsGetCmd(tokenDir, endpoint string) *cobra.Command {
 	return clientsGetCmd
 }
 
-func ClientsGet(tokenDir, endpoint, id string, outCredentials bool) error {
+func ClientsGet(tokenDir, endpoint string, oidcConfig *auth.OIDCClientConfig, id string, outCredentials bool) error {
 	if id == "" {
 		return fmt.Errorf("client id is required")
 	}
 
 	ctx := context.Background()
-	oc, err := auth.NewOIDCClient(ctx)
+	oc, err := auth.NewOIDCClient(ctx, oidcConfig)
 	if err != nil {
 		return fmt.Errorf("error creating OIDC client: %s", err)
 	}

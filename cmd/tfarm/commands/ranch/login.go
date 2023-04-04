@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func LoginCmd(tokenDir string) *cobra.Command {
+func LoginCmd(tokenDir string, oidcConfig *auth.OIDCClientConfig) *cobra.Command {
 	var username string
 	var password string
 
@@ -21,7 +21,7 @@ func LoginCmd(tokenDir string) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: false,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return Login(tokenDir, username, password)
+			return Login(tokenDir, username, password, oidcConfig)
 		},
 	}
 
@@ -31,9 +31,9 @@ func LoginCmd(tokenDir string) *cobra.Command {
 	return loginCmd
 }
 
-func Login(tokenDir, username, password string) error {
+func Login(tokenDir, username, password string, oidcConfig *auth.OIDCClientConfig) error {
 	ctx := context.Background()
-	oc, err := auth.NewOIDCClient(ctx)
+	oc, err := auth.NewOIDCClient(ctx, oidcConfig)
 	if err != nil {
 		return fmt.Errorf("error creating OIDC client: %s", err)
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ClientsDeleteCmd(tokenDir, endpoint string) *cobra.Command {
+func ClientsDeleteCmd(tokenDir, endpoint string, oidcConfig *auth.OIDCClientConfig) *cobra.Command {
 	clientsDeleteCmd := &cobra.Command{
 		Use:           "delete [id]",
 		Short:         "Delete a ranch client",
@@ -22,20 +22,20 @@ func ClientsDeleteCmd(tokenDir, endpoint string) *cobra.Command {
 				cmd.Help()
 				return nil
 			}
-			return ClientsDelete(tokenDir, endpoint, args[0])
+			return ClientsDelete(tokenDir, endpoint, oidcConfig, args[0])
 		},
 	}
 
 	return clientsDeleteCmd
 }
 
-func ClientsDelete(tokenDir, endpoint, id string) error {
+func ClientsDelete(tokenDir, endpoint string, oidcConfig *auth.OIDCClientConfig, id string) error {
 	if id == "" {
 		return fmt.Errorf("client id is required")
 	}
 
 	ctx := context.Background()
-	oc, err := auth.NewOIDCClient(ctx)
+	oc, err := auth.NewOIDCClient(ctx, oidcConfig)
 	if err != nil {
 		return fmt.Errorf("error creating OIDC client: %s", err)
 	}

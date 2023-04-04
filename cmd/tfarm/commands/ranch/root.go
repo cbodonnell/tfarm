@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/cbodonnell/tfarm/pkg/ranch/auth"
 	"github.com/spf13/cobra"
 )
 
@@ -22,9 +23,10 @@ func RootCmd() *cobra.Command {
 
 	tokenDir := getRanchTokenDir()
 	endpoint := getRanchAPIEndpoint()
+	oidcConfig := getOIDCConfig()
 
-	rootCmd.AddCommand(ClientsCmd(tokenDir, endpoint))
-	rootCmd.AddCommand(LoginCmd(tokenDir))
+	rootCmd.AddCommand(ClientsCmd(tokenDir, endpoint, oidcConfig))
+	rootCmd.AddCommand(LoginCmd(tokenDir, oidcConfig))
 	rootCmd.AddCommand(LogoutCmd(tokenDir))
 
 	return rootCmd
@@ -52,4 +54,21 @@ func getRanchAPIEndpoint() string {
 	}
 
 	return endpoint
+}
+
+func getOIDCConfig() *auth.OIDCClientConfig {
+	ranchOauthIssuer := os.Getenv("RANCH_OIDC_ISSUER")
+	if ranchOauthIssuer == "" {
+		ranchOauthIssuer = "https://auth.tunnel.farm/realms/tunnel.farm"
+	}
+
+	ranchOauthClientID := os.Getenv("RANCH_OIDC_CLIENT_ID")
+	if ranchOauthClientID == "" {
+		ranchOauthClientID = "tfarm-cli"
+	}
+
+	return &auth.OIDCClientConfig{
+		Issuer:   ranchOauthIssuer,
+		ClientID: ranchOauthClientID,
+	}
 }
