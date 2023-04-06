@@ -49,7 +49,7 @@ In another terminal, create the $HOME/.tfarm directory and copy the server's `cl
 
 ```bash
 mkdir -p $HOME/.tfarm
-cp $TFARMD_WORK_DIR/client.json $HOME/.tfarm
+cp $TFARMD_WORK_DIR/tls/client.json $HOME/.tfarm
 ```
 
 Check the status of the tfarm server.
@@ -80,15 +80,11 @@ tfarm ranch clients create --credentials | tfarm configure --credentials-stdin
 
 Once the tfarm server is configured, you can use the tfarm CLI to manage tunnels.
 
-#### Validate that the tfarm server is running
-
 Check the status of the tfarm server.
 
 ```bash
 tfarm status
 ```
-
-#### Create a tunnel
 
 Create a tunnel that forwards traffic to local port 8080.
 
@@ -101,8 +97,6 @@ Check the status.
 ```bash
 tfarm status
 ```
-
-#### Delete a tunnel
 
 Delete the tunnel.
 
