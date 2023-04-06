@@ -205,6 +205,11 @@ func (f *Frpc) Stop() error {
 func (f *Frpc) Restart() error {
 	log.Println("restarting frpc")
 
+	if f.cmd == nil {
+		log.Println("warning: frpc is not running, ignoring restart request")
+		return nil
+	}
+
 	f.restarting = true
 	if err := f.Stop(); err != nil {
 		return fmt.Errorf("failed to stop frpc: %s", err)
