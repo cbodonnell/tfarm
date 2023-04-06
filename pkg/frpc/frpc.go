@@ -179,7 +179,8 @@ func (f *Frpc) Stop() error {
 	log.Println("stopping frpc")
 
 	if f.cmd == nil {
-		return errors.New("frpc not running")
+		log.Println("warning: frpc is not running, ignoring stop request")
+		return nil
 	}
 
 	if err := f.cmd.Process.Signal(os.Interrupt); err != nil {
