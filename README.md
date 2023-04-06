@@ -78,8 +78,6 @@ tfarm ranch clients create --credentials | tfarm configure --credentials-stdin
 
 ### Manage tunnels with the tfarm CLI
 
-Once the tfarm server is configured, you can use the tfarm CLI to manage tunnels.
-
 Check the status of the tfarm server.
 
 ```bash
