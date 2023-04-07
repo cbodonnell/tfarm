@@ -50,6 +50,24 @@ func (c *APIClient) SetToken(token *oauth2.Token) {
 	c.token = token
 }
 
+func (c *APIClient) GetInfo(params *APIRequestParams) (*InfoResponse, error) {
+	resp, err := c.httpClient.Get(c.endpoint + "/api/.well-known/info")
+	if err != nil {
+		return nil, fmt.Errorf("error getting info: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %s", resp.Status)
+	}
+
+	var response InfoResponse
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, fmt.Errorf("error decoding response: %w", err)
+	}
+	return &response, nil
+}
+
 func (c *APIClient) ListClients(params *APIRequestParams) ([]*ClientResponse, error) {
 	resp, err := c.httpClient.Get(c.endpoint + "/api/clients")
 	if err != nil {

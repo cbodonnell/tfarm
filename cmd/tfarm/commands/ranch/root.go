@@ -23,8 +23,10 @@ func RootCmd() *cobra.Command {
 
 	tokenDir := getRanchTokenDir()
 	endpoint := getRanchAPIEndpoint()
+	// TODO: Make this discover the OIDC config from the ranch API
 	oidcConfig := getOIDCConfig()
 
+	rootCmd.AddCommand(InfoCmd(tokenDir, endpoint))
 	rootCmd.AddCommand(ClientsCmd(tokenDir, endpoint, oidcConfig))
 	rootCmd.AddCommand(LoginCmd(tokenDir, oidcConfig))
 	rootCmd.AddCommand(LogoutCmd(tokenDir))
