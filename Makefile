@@ -40,6 +40,9 @@ tfarm-server-certs-regenerate: tfarm
 trivy-fs:
 	trivy fs --scanners vuln --ignore-unfixed .
 
+tag:
+	git tag -a $(version) -m "Release $(version)" && git push origin $(version)
+
 release: clean
 	goreleaser release -f ./deploy/.goreleaser.yaml --clean
 
