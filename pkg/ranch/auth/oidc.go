@@ -14,6 +14,10 @@ type OIDCClientConfig struct {
 }
 
 func NewOIDCClient(ctx context.Context, cfg *OIDCClientConfig) (*oauth.OIDCClient, error) {
+	if cfg == nil {
+		return nil, fmt.Errorf("OIDC client config is not set")
+	}
+
 	oc, err := oauth.NewOIDCClient(ctx, cfg.Issuer, cfg.ClientID, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating OIDC client: %w", err)

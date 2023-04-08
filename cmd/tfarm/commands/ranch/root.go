@@ -1,10 +1,13 @@
 package ranch
 
 import (
+	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path"
 
+	"github.com/cbodonnell/tfarm/pkg/ranch/api"
 	"github.com/cbodonnell/tfarm/pkg/ranch/auth"
 	"github.com/spf13/cobra"
 )
@@ -23,8 +26,8 @@ func RootCmd() *cobra.Command {
 
 	tokenDir := getRanchTokenDir()
 	endpoint := getRanchAPIEndpoint()
-	// TODO: Make this discover the OIDC config from the ranch API
-	oidcConfig := getOIDCConfig()
+	// is this the right place to get the oidc config?
+	oidcConfig, _ := getOIDCConfig(endpoint)
 
 	rootCmd.AddCommand(InfoCmd(tokenDir, endpoint))
 	rootCmd.AddCommand(ClientsCmd(tokenDir, endpoint, oidcConfig))
@@ -58,19 +61,15 @@ func getRanchAPIEndpoint() string {
 	return endpoint
 }
 
-func getOIDCConfig() *auth.OIDCClientConfig {
-	ranchOauthIssuer := os.Getenv("RANCH_OIDC_ISSUER")
-	if ranchOauthIssuer == "" {
-		ranchOauthIssuer = "https://auth.tunnel.farm/realms/tunnel.farm"
-	}
-
-	ranchOauthClientID := os.Getenv("RANCH_OIDC_CLIENT_ID")
-	if ranchOauthClientID == "" {
-		ranchOauthClientID = "tfarm-cli"
+func getOIDCConfig(endpoint string) (*auth.OIDCClientConfig, error) {
+	apiClient := api.NewClient(http.DefaultClient, endpoint)
+	res, err := apiClient.GetInfo(&api.APIRequestParams{})
+	if err != nil {
+		return nil, fmt.Errorf("error getting ranch oidc config: %s", err)
 	}
 
 	return &auth.OIDCClientConfig{
-		Issuer:   ranchOauthIssuer,
-		ClientID: ranchOauthClientID,
-	}
+		Issuer:   res.OIDC.Issuer,
+		ClientID: res.OIDC.ClientID,
+	}, nil
 }
