@@ -21,11 +21,25 @@ type APIClient struct {
 	configDir  string
 }
 
-type APIInfo struct {
-	ClientVersion  string `json:"client_version"`
-	ServerVersion  string `json:"server_version"`
-	ServerEndpoint string `json:"server_endpoint"`
-	ConfigDir      string `json:"config_dir"`
+// TODO: move this to the info package and differentiate between tfarm and ranch info
+type Info struct {
+	Client ClientInfo `json:"client"`
+	Server ServerInfo `json:"server"`
+}
+
+type ClientInfo struct {
+	Version string `json:"version"`
+	Config  string `json:"config"`
+}
+
+type ServerInfo struct {
+	Version  string `json:"version"`
+	Endpoint string `json:"endpoint"`
+	Error    string `json:"error,omitempty"`
+}
+
+type ServerInfoResponse struct {
+	Version string `json:"version"`
 }
 
 type APIResponse struct {
@@ -83,13 +97,44 @@ func NewClient(endpoint string, configDir string) (*APIClient, error) {
 	}, nil
 }
 
-func (c *APIClient) Info() (*APIInfo, error) {
-	return &APIInfo{
-		ClientVersion:  version.Version,
-		ServerVersion:  "TODO",
-		ServerEndpoint: c.endpoint,
-		ConfigDir:      c.configDir,
-	}, nil
+func (c *APIClient) Info() *Info {
+	info := &Info{
+		Client: ClientInfo{
+			Version: version.Version,
+			Config:  c.configDir,
+		},
+		Server: ServerInfo{
+			Endpoint: c.endpoint,
+		},
+	}
+
+	if serverInfo, err := c.getServerInfo(); err != nil {
+		info.Server.Error = fmt.Sprintf("error getting info: %s", err)
+	} else {
+		info.Server.Version = serverInfo.Version
+	}
+
+	return info
+}
+
+func (c *APIClient) getServerInfo() (*ServerInfoResponse, error) {
+	resp, err := c.httpClient.Get(c.endpoint + "/api/info")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var response APIResponse
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, fmt.Errorf("failed to decode response with status code %d: %s", resp.StatusCode, err)
+	}
+
+	serverInfo := &ServerInfoResponse{}
+	if err := json.Unmarshal([]byte(response.Message), serverInfo); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response message: %s", err)
+	}
+
+	return serverInfo, nil
 }
 
 //  TODO: Refactor this to use a generic Do method

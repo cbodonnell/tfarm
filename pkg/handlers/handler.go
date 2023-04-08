@@ -15,6 +15,7 @@ func NewMuxHandler(f *frpc.Frpc) http.Handler {
 
 	// pre-configure routes
 	preConfigure := r.NewRoute().Subrouter()
+	preConfigure.HandleFunc("/api/info", HandleInfo()).Methods("GET")
 	preConfigure.HandleFunc("/api/configure", HandleConfigure(f)).Methods("PUT")
 
 	// post-configure routes

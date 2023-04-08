@@ -2,6 +2,8 @@ package term
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -34,4 +36,16 @@ func PasswordPrompt(label string) string {
 	s = string(b)
 	fmt.Println()
 	return s
+}
+
+func PrettyJSON(v any) ([]byte, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling info to json: %s", err)
+	}
+	var out bytes.Buffer
+	if err := json.Indent(&out, b, "", "  "); err != nil {
+		return nil, fmt.Errorf("error indenting json: %s", err)
+	}
+	return out.Bytes(), nil
 }

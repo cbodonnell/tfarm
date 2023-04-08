@@ -1,9 +1,9 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
 
+	"github.com/cbodonnell/tfarm/pkg/term"
 	"github.com/spf13/cobra"
 )
 
@@ -31,23 +31,22 @@ func Info(outputFormat string) error {
 		return fmt.Errorf("error creating client: %s", err)
 	}
 
-	info, err := client.Info()
-	if err != nil {
-		return fmt.Errorf("error getting info: %s", err)
-	}
+	info := client.Info()
 
 	switch outputFormat {
+	// TODO: make this yaml so it can be more dynamic
 	case "text":
-		fmt.Println("Client Version:")
-		fmt.Println("  ", info.ClientVersion)
-		fmt.Println("Server Version:")
-		fmt.Println("  ", info.ServerVersion)
-		fmt.Println("Server Endpoint:")
-		fmt.Println("  ", info.ServerEndpoint)
-		fmt.Println("Configuration:")
-		fmt.Println("  ", info.ConfigDir)
+		fmt.Println("Client:")
+		fmt.Println("  Version:", info.Client.Version)
+		fmt.Println("  Config:", info.Client.Config)
+		fmt.Println("Server:")
+		fmt.Println("  Version:", info.Server.Version)
+		fmt.Println("  Endpoint", info.Server.Endpoint)
+		if info.Server.Error != "" {
+			fmt.Println("  Error:", info.Server.Error)
+		}
 	case "json":
-		b, err := json.Marshal(info)
+		b, err := term.PrettyJSON(info)
 		if err != nil {
 			return fmt.Errorf("error marshaling info to json: %s", err)
 		}
