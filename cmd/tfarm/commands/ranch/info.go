@@ -25,23 +25,7 @@ func InfoCmd(tokenDir, endpoint string) *cobra.Command {
 }
 
 func Info(tokenDir, endpoint string) error {
-	apiClient := api.NewClient(http.DefaultClient, endpoint)
-	res, err := apiClient.GetInfo(&api.APIRequestParams{})
-	if err != nil {
-		return fmt.Errorf("error listing clients: %s", err)
-	}
-
-	info := info.Info{
-		Ready:    res.Ready,
-		Version:  res.Version,
-		TokenDir: tokenDir,
-		Endpoint: endpoint,
-		OIDC: info.OIDCInfo{
-			Issuer:   res.OIDC.Issuer,
-			ClientID: res.OIDC.ClientID,
-		},
-	}
-
+	info := getInfo(tokenDir, endpoint)
 	b, err := json.Marshal(info)
 	if err != nil {
 		return fmt.Errorf("error marshaling clients: %s", err)
@@ -50,4 +34,24 @@ func Info(tokenDir, endpoint string) error {
 	fmt.Print(string(b))
 
 	return nil
+}
+
+func getInfo(tokenDir, endpoint string) *info.Info {
+	info := info.Info{
+		TokenDir: tokenDir,
+		Endpoint: endpoint,
+	}
+
+	apiClient := api.NewClient(http.DefaultClient, endpoint)
+	res, err := apiClient.GetInfo(&api.APIRequestParams{})
+	if err != nil {
+		return &info
+	}
+
+	info.Ready = res.Ready
+	info.Version = res.Version
+	info.OIDC.Issuer = res.OIDC.Issuer
+	info.OIDC.ClientID = res.OIDC.ClientID
+
+	return &info
 }
