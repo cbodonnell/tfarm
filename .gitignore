@@ -3,7 +3,6 @@
 
 # Builds
 bin/
-dist/
 
 # Work Dir
 tfarmd-*work-dir/

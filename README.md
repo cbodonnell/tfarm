@@ -101,3 +101,29 @@ Delete the tunnel.
 ```bash
 tfarm delete my-tunnel
 ```
+
+## Development
+
+### Dependencies
+
+* Git
+* Make
+* Go
+* Docker
+* frpc
+
+### Configuration
+
+Create a `.env` file with the following environment variables.
+
+```bash
+TFARMD_FRPC_BIN_PATH=/path/to/frpc
+TFARMD_WORK_DIR=/path/to/work/dir
+TFARMD_LOG_LEVEL=debug
+```
+
+### Build
+
+```bash
+make tfarm
+```
