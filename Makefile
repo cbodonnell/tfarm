@@ -1,4 +1,4 @@
-include .env
+-include .env
 
 VERSION ?= $(shell git rev-parse --short HEAD)
 ifneq ($(shell git status --porcelain),)
