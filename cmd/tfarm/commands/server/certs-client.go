@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -14,6 +15,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/cbodonnell/tfarm/pkg/certs"
 	"github.com/spf13/cobra"
 )
 
@@ -108,19 +110,24 @@ func CertsClient(name string) error {
 		return fmt.Errorf("error creating clients directory: %s", err)
 	}
 
-	certFile, err := os.OpenFile(path.Join(workDir, "tls", "clients", name, "client.crt"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
-	if err != nil {
-		return fmt.Errorf("error creating client certificate file: %s", err)
+	certBuff := bytes.NewBuffer(nil)
+	if err := pem.Encode(certBuff, &pem.Block{Type: "CERTIFICATE", Bytes: clientCert}); err != nil {
+		return fmt.Errorf("error pem encoding client certificate: %s", err)
 	}
-	pem.Encode(certFile, &pem.Block{Type: "CERTIFICATE", Bytes: clientCert})
-	certFile.Close()
 
-	keyFile, err := os.OpenFile(path.Join(workDir, "tls", "clients", name, "client.key"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
-	if err != nil {
-		return fmt.Errorf("error creating client key file: %s", err)
+	keyBuff := bytes.NewBuffer(nil)
+	if err := pem.Encode(keyBuff, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(clientKey)}); err != nil {
+		return fmt.Errorf("error pem encoding client key: %s", err)
 	}
-	pem.Encode(keyFile, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(clientKey)})
-	keyFile.Close()
+
+	client := &certs.Client{
+		CA:   caCertPEM,
+		Cert: certBuff.Bytes(),
+		Key:  keyBuff.Bytes(),
+	}
+	if err := client.SaveToFile(path.Join(workDir, "tls", "clients", name, "client.json")); err != nil {
+		return fmt.Errorf("error saving client to file: %s", err)
+	}
 
 	absPath, err := filepath.Abs(path.Join(workDir, "tls", "clients", name))
 	if err != nil {
@@ -128,8 +135,7 @@ func CertsClient(name string) error {
 	}
 
 	fmt.Println("Client certificate and key written to:")
-	fmt.Println("  ", path.Join(absPath, "client.crt"))
-	fmt.Println("  ", path.Join(absPath, "client.key"))
+	fmt.Println("  ", path.Join(absPath, "client.json"))
 
 	return nil
 }
