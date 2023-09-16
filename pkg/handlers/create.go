@@ -15,11 +15,18 @@ import (
 	"github.com/google/uuid"
 )
 
-const tunnelTemplate = `[{{ .Name }}]
+const httpTunnelTemplate = `[{{ .Name }}]
 type = {{ .Type }}
 local_ip = {{ .LocalIP }}
 local_port = {{ .LocalPort }}
 subdomain = TBD
+meta_proxy_id = {{ .ProxyID }}
+`
+
+const tcpTunnelTemplate = `[{{ .Name }}]
+type = {{ .Type }}
+local_ip = {{ .LocalIP }}
+local_port = {{ .LocalPort }}
 meta_proxy_id = {{ .ProxyID }}
 `
 
@@ -41,8 +48,19 @@ func HandleCreate(f *frpc.Frpc) func(w http.ResponseWriter, r *http.Request) {
 
 		createRequest.ProxyID = uuid.New().String()
 
+		var tunnelConfigTemplate *template.Template
+		switch createRequest.Type {
+		case "http", "https":
+			tunnelConfigTemplate = template.Must(template.New("tunnel").Parse(httpTunnelTemplate))
+		case "tcp":
+			tunnelConfigTemplate = template.Must(template.New("tunnel").Parse(tcpTunnelTemplate))
+		default:
+			log.Printf("invalid tunnel type: %s", createRequest.Type)
+			api.RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("invalid tunnel type: %s", createRequest.Type))
+			return
+		}
+
 		tunnelConfig := &bytes.Buffer{}
-		tunnelConfigTemplate := template.Must(template.New("tunnel").Parse(tunnelTemplate))
 		if err := tunnelConfigTemplate.Execute(tunnelConfig, createRequest); err != nil {
 			log.Printf("failed to execute template: %s", err)
 			api.RespondWithError(w, http.StatusInternalServerError, "failed to execute template")
