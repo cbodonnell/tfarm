@@ -27,6 +27,7 @@ const tcpTunnelTemplate = `[{{ .Name }}]
 type = {{ .Type }}
 local_ip = {{ .LocalIP }}
 local_port = {{ .LocalPort }}
+remote_port = {{ .RemotePort }}
 meta_proxy_id = {{ .ProxyID }}
 `
 

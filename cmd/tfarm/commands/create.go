@@ -11,6 +11,7 @@ func CreateCmd() *cobra.Command {
 	var tunnelType string
 	var localIP string
 	var localPort int
+	var remotePort int
 
 	createCmd := &cobra.Command{
 		Use:           "create [NAME]",
@@ -21,20 +22,25 @@ func CreateCmd() *cobra.Command {
 			if len(args) != 1 {
 				return fmt.Errorf("name is required")
 			}
-			return Create(args[0], tunnelType, localIP, localPort)
+			return Create(args[0], tunnelType, localIP, localPort, remotePort)
 		},
 	}
 
-	createCmd.Flags().StringVarP(&tunnelType, "type", "t", "http", "tunnel type (http, tcp, udp)")
+	createCmd.Flags().StringVarP(&tunnelType, "type", "t", "http", "tunnel type (http, tcp)")
 	createCmd.Flags().StringVarP(&localIP, "local-ip", "l", "127.0.0.1", "local ip address")
 	createCmd.Flags().IntVarP(&localPort, "local-port", "p", 0, "local port (required)")
+	createCmd.Flags().IntVarP(&remotePort, "remote-port", "r", 0, "remote port (required for tcp)")
 
 	return createCmd
 }
 
-func Create(name string, tunnelType string, localIP string, localPort int) error {
+func Create(name string, tunnelType string, localIP string, localPort int, remotePort int) error {
 	if localPort == 0 {
 		return fmt.Errorf("local port is required")
+	}
+
+	if tunnelType == "tcp" && remotePort == 0 {
+		return fmt.Errorf("remote port is required for tcp tunnels")
 	}
 
 	client, err := getClient()
@@ -43,10 +49,11 @@ func Create(name string, tunnelType string, localIP string, localPort int) error
 	}
 
 	req := &api.CreateRequest{
-		Name:      name,
-		Type:      tunnelType,
-		LocalIP:   localIP,
-		LocalPort: localPort,
+		Name:       name,
+		Type:       tunnelType,
+		LocalIP:    localIP,
+		LocalPort:  localPort,
+		RemotePort: remotePort,
 	}
 	status, err := client.Create(req)
 	if err != nil {

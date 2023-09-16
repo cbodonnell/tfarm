@@ -53,11 +53,12 @@ type APIRequest struct {
 }
 
 type CreateRequest struct {
-	Name      string `json:"name"`
-	Type      string `json:"type"`
-	LocalIP   string `json:"local_ip"`
-	LocalPort int    `json:"local_port"`
-	ProxyID   string // client-side identifier
+	Name       string `json:"name"`
+	Type       string `json:"type"`
+	LocalIP    string `json:"local_ip"`
+	LocalPort  int    `json:"local_port"`
+	RemotePort int    `json:"remote_port,omitempty"`
+	ProxyID    string // client-side identifier
 }
 
 type DeleteRequest struct {
@@ -137,7 +138,7 @@ func (c *APIClient) getServerInfo() (*ServerInfoResponse, error) {
 	return serverInfo, nil
 }
 
-//  TODO: Refactor this to use a generic Do method
+// TODO: Refactor this to use a generic Do method
 func (c *APIClient) Status(req *APIRequest) (*APIResponse, error) {
 	resp, err := c.httpClient.Get(c.endpoint + "/api/status")
 	if err != nil {
