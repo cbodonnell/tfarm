@@ -16,6 +16,7 @@ var isConfiguredMu sync.Mutex
 type ConfigureCredentials struct {
 	ClientID     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
+	// TODO: add client certificate, key, and ca to this and save to ./tls/frps
 }
 
 func IsConfigured() bool {
