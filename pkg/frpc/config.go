@@ -21,6 +21,10 @@ admin_addr = {{ .AdminAddr }}
 admin_port = {{ .AdminPort }}
 includes = ./conf.d/*.ini
 log_level = {{ .LogLevel }}
+tls_enable = true
+tls_cert_file = ./tls/frps/client.crt
+tls_key_file = ./tls/frps/client.key
+tls_trusted_ca_file = ./tls/frps/ca.crt
 meta_client_id = "{{ index .Metas "client_id" }}"
 meta_client_signature = "{{ index .Metas "client_signature" }}"
 `
