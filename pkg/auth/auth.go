@@ -11,7 +11,7 @@ import (
 )
 
 var isConfigured bool
-var isConfiguredMu sync.Mutex
+var isConfiguredMu sync.RWMutex
 
 type ConfigureCredentials struct {
 	ClientID     string `json:"client_id"`
@@ -20,6 +20,8 @@ type ConfigureCredentials struct {
 }
 
 func IsConfigured() bool {
+	isConfiguredMu.RLock()
+	defer isConfiguredMu.RUnlock()
 	return isConfigured
 }
 
