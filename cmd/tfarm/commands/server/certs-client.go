@@ -1,19 +1,9 @@
 package server
 
 import (
-	"bytes"
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
-	"crypto/x509/pkix"
-	"encoding/pem"
 	"fmt"
-	"io"
-	"math/big"
 	"os"
 	"path"
-	"path/filepath"
-	"time"
 
 	"github.com/cbodonnell/tfarm/pkg/certs"
 	"github.com/spf13/cobra"
@@ -47,95 +37,5 @@ func CertsClient(name string) error {
 		workDir = pwd
 	}
 
-	fmt.Println("Generating client certificate...")
-
-	// read the ca.key and ca.crt files from the workDir/tls directory
-	caKeyFile, err := os.Open(path.Join(workDir, "tls", "ca.key"))
-	if err != nil {
-		return fmt.Errorf("error opening CA key file: %s", err)
-	}
-	defer caKeyFile.Close()
-	caKeyPEM, err := io.ReadAll(caKeyFile)
-	if err != nil {
-		return fmt.Errorf("error reading CA key file: %s", err)
-	}
-	caKeyBlock, _ := pem.Decode(caKeyPEM)
-	caKey, err := x509.ParsePKCS1PrivateKey(caKeyBlock.Bytes)
-	if err != nil {
-		return fmt.Errorf("error parsing CA key: %s", err)
-	}
-
-	caFile, err := os.Open(path.Join(workDir, "tls", "ca.crt"))
-	if err != nil {
-		return fmt.Errorf("error opening CA file: %s", err)
-	}
-	defer caFile.Close()
-	caCertPEM, err := io.ReadAll(caFile)
-	if err != nil {
-		return fmt.Errorf("error reading CA file: %s", err)
-	}
-	caCertBlock, _ := pem.Decode(caCertPEM)
-	caCert, err := x509.ParseCertificate(caCertBlock.Bytes)
-	if err != nil {
-		return fmt.Errorf("error parsing CA certificate: %s", err)
-	}
-
-	// Generate a new client certificate/key pair
-	clientTemplate := x509.Certificate{
-		SerialNumber: big.NewInt(3),
-		Subject: pkix.Name{
-			CommonName: name,
-		},
-		NotBefore:             time.Now(),
-		NotAfter:              time.Now().AddDate(1, 0, 0), // Valid for 1 year
-		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
-		SignatureAlgorithm:    x509.SHA256WithRSA,
-		Issuer:                caCert.Subject,
-		BasicConstraintsValid: true,
-	}
-	clientKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		return fmt.Errorf("error generating client key: %s", err)
-	}
-
-	clientCert, err := x509.CreateCertificate(rand.Reader, &clientTemplate, caCert, &clientKey.PublicKey, caKey)
-	if err != nil {
-		return fmt.Errorf("error generating client certificate: %s", err)
-	}
-
-	// make sure the tls/clients directory exists
-	err = os.MkdirAll(path.Join(workDir, "tls", "clients", name), 0755)
-	if err != nil {
-		return fmt.Errorf("error creating clients directory: %s", err)
-	}
-
-	certBuff := bytes.NewBuffer(nil)
-	if err := pem.Encode(certBuff, &pem.Block{Type: "CERTIFICATE", Bytes: clientCert}); err != nil {
-		return fmt.Errorf("error pem encoding client certificate: %s", err)
-	}
-
-	keyBuff := bytes.NewBuffer(nil)
-	if err := pem.Encode(keyBuff, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(clientKey)}); err != nil {
-		return fmt.Errorf("error pem encoding client key: %s", err)
-	}
-
-	client := &certs.Client{
-		CA:   caCertPEM,
-		Cert: certBuff.Bytes(),
-		Key:  keyBuff.Bytes(),
-	}
-	if err := client.SaveToFile(path.Join(workDir, "tls", "clients", name, "client.json")); err != nil {
-		return fmt.Errorf("error saving client to file: %s", err)
-	}
-
-	absPath, err := filepath.Abs(path.Join(workDir, "tls", "clients", name))
-	if err != nil {
-		return fmt.Errorf("error getting absolute path of client certificate: %s", err)
-	}
-
-	fmt.Println("Client certificate and key written to:")
-	fmt.Println("  ", path.Join(absPath, "client.json"))
-
-	return nil
+	return certs.GenerateClientCerts(path.Join(workDir, "tls"), name)
 }

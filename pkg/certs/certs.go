@@ -17,7 +17,7 @@ import (
 )
 
 // TODO: Split this into a CA, server, and client cert generator
-func GenerateCerts(dir string) error {
+func GenerateServerCerts(dir string) error {
 	fmt.Println("Generating CA certificate...")
 
 	// Generate a new CA certificate

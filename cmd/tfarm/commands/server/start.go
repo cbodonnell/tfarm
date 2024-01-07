@@ -96,7 +96,7 @@ func Start(port int, cfg config.ClientCommonConf) error {
 	if _, err := os.Stat(tlsDir); err != nil {
 		if os.IsNotExist(err) {
 			log.Println("tls directory not found, generating certificates")
-			if err := certs.GenerateCerts(tlsDir); err != nil {
+			if err := certs.GenerateServerCerts(tlsDir); err != nil {
 				return fmt.Errorf("error generating tls certificates: %s", err)
 			}
 		} else {

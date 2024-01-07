@@ -33,5 +33,5 @@ func CertsRegenerate() error {
 		workDir = pwd
 	}
 
-	return certs.GenerateCerts(path.Join(workDir, "tls"))
+	return certs.GenerateServerCerts(path.Join(workDir, "tls"))
 }
