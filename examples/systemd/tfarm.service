@@ -1,0 +1,15 @@
+[Unit]
+Description=tfarm service that manages tfarmd
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=3
+User=tfarm
+Environment="TFARMD_FRPC_BIN_PATH=/usr/local/bin/frpc"
+Environment="TFARMD_WORK_DIR=/var/lib/tfarm"
+ExecStart=/usr/local/bin/tfarm server start
+
+[Install]
+WantedBy=default.target
