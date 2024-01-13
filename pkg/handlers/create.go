@@ -23,7 +23,7 @@ subdomain = TBD
 meta_proxy_id = {{ .ProxyID }}
 `
 
-const tcpTunnelTemplate = `[{{ .Name }}]
+const tcpUdpTunnelTemplate = `[{{ .Name }}]
 type = {{ .Type }}
 local_ip = {{ .LocalIP }}
 local_port = {{ .LocalPort }}
@@ -53,8 +53,8 @@ func HandleCreate(f *frpc.Frpc) func(w http.ResponseWriter, r *http.Request) {
 		switch createRequest.Type {
 		case "http", "https":
 			tunnelConfigTemplate = template.Must(template.New("tunnel").Parse(httpTunnelTemplate))
-		case "tcp":
-			tunnelConfigTemplate = template.Must(template.New("tunnel").Parse(tcpTunnelTemplate))
+		case "tcp", "udp":
+			tunnelConfigTemplate = template.Must(template.New("tunnel").Parse(tcpUdpTunnelTemplate))
 		default:
 			log.Printf("invalid tunnel type: %s", createRequest.Type)
 			api.RespondWithError(w, http.StatusBadRequest, fmt.Sprintf("invalid tunnel type: %s", createRequest.Type))

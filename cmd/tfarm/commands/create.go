@@ -39,8 +39,10 @@ func Create(name string, tunnelType string, localIP string, localPort int, remot
 		return fmt.Errorf("local port is required")
 	}
 
-	if tunnelType == "tcp" && remotePort == 0 {
-		return fmt.Errorf("remote port is required for tcp tunnels")
+	isRemotePortRequired := tunnelType == "tcp" || tunnelType == "udp"
+
+	if isRemotePortRequired && remotePort == 0 {
+		return fmt.Errorf("remote port is required for tcp and udp tunnels")
 	}
 
 	client, err := getClient()
