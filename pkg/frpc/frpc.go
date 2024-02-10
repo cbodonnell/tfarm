@@ -94,6 +94,10 @@ func (f *Frpc) StartLoop() {
 }
 
 func (f *Frpc) SignConfig(creds *auth.ConfigureCredentials) error {
+	if err := SaveTLSFiles(creds.ClientCACert, creds.ClientTLSCert, creds.ClientTLSKey, path.Join(f.WorkDir, "tls", "frps")); err != nil {
+		return fmt.Errorf("error writing tls files: %s", err)
+	}
+
 	decodedSecret, err := base64.URLEncoding.DecodeString(creds.ClientSecret)
 	if err != nil {
 		return fmt.Errorf("error decoding client secret: %s", err)

@@ -2,9 +2,11 @@ package frpc
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"html/template"
 	"os"
+	"path/filepath"
 
 	"github.com/fatedier/frp/pkg/config"
 	"gopkg.in/ini.v1"
@@ -57,20 +59,40 @@ func ParseFrpcCommonConfig(source interface{}) (config.ClientCommonConf, error) 
 	return common, nil
 }
 
-// func SaveFrpcCommonConfig(common config.ClientCommonConf, path string) error {
-// 	f := ini.Empty()
-// 	s, err := f.NewSection("common")
-// 	if err != nil {
-// 		return fmt.Errorf("failed to create [common] section: %s", err)
-// 	}
+func SaveTLSFiles(caCert, cert, key string, path string) error {
+	if err := os.MkdirAll(path, 0755); err != nil {
+		return fmt.Errorf("failed to create tls directory: %s", err)
+	}
 
-// 	err = s.ReflectFrom(&common)
-// 	if err != nil {
-// 		return fmt.Errorf("failed to reflect common config: %s", err)
-// 	}
+	decodedCaCert, err := base64.StdEncoding.DecodeString(caCert)
+	if err != nil {
+		return fmt.Errorf("failed to decode ca.crt: %s", err)
+	}
 
-// 	return f.SaveTo(path)
-// }
+	if err := os.WriteFile(filepath.Join(path, "ca.crt"), decodedCaCert, 0600); err != nil {
+		return fmt.Errorf("failed to write ca.crt: %s", err)
+	}
+
+	decodedCert, err := base64.StdEncoding.DecodeString(cert)
+	if err != nil {
+		return fmt.Errorf("failed to decode client.crt: %s", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(path, "client.crt"), decodedCert, 0600); err != nil {
+		return fmt.Errorf("failed to write client.crt: %s", err)
+	}
+
+	decodedKey, err := base64.StdEncoding.DecodeString(key)
+	if err != nil {
+		return fmt.Errorf("failed to decode client.key: %s", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(path, "client.key"), decodedKey, 0600); err != nil {
+		return fmt.Errorf("failed to write client.key: %s", err)
+	}
+
+	return nil
+}
 
 func SaveFrpcCommonConfig(common config.ClientCommonConf, path string) error {
 	// parse template

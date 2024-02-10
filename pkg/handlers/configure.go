@@ -22,9 +22,13 @@ func HandleConfigure(f *frpc.Frpc) func(w http.ResponseWriter, r *http.Request) 
 		}
 
 		// chech that configure request has all required fields
-		if configureCredentials.ClientID == "" || configureCredentials.ClientSecret == "" {
-			log.Printf("client_id and client_secret are required")
-			api.RespondWithError(w, http.StatusBadRequest, "client_id and client_secret are required")
+		if configureCredentials.ClientID == "" ||
+			configureCredentials.ClientSecret == "" ||
+			configureCredentials.ClientCACert == "" ||
+			configureCredentials.ClientTLSCert == "" ||
+			configureCredentials.ClientTLSKey == "" {
+			log.Printf("client_id, client_secret, client_ca_cert, client_tls_cert, and client_tls_key are required")
+			api.RespondWithError(w, http.StatusBadRequest, "client_id, client_secret, client_ca_cert, client_tls_cert, and client_tls_key are required")
 			return
 		}
 
