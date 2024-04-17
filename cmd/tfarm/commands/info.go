@@ -41,7 +41,7 @@ func Info(outputFormat string) error {
 		fmt.Println("  Config:", info.Client.Config)
 		fmt.Println("Server:")
 		fmt.Println("  Version:", info.Server.Version)
-		fmt.Println("  Endpoint", info.Server.Endpoint)
+		fmt.Println("  Endpoint:", info.Server.Endpoint)
 		if info.Server.Error != "" {
 			fmt.Println("  Error:", info.Server.Error)
 		}
