@@ -40,7 +40,7 @@ func Info(tokenDir, endpoint, outputFormat string) error {
 		}
 		fmt.Println("Version:", info.Version)
 		fmt.Println("Config:", info.TokenDir)
-		fmt.Println("Endpoint", info.Endpoint)
+		fmt.Println("Endpoint:", info.Endpoint)
 		fmt.Println("OIDC:")
 		fmt.Println("  Issuer:", info.OIDC.Issuer)
 		fmt.Println("  Client ID:", info.OIDC.ClientID)
