@@ -21,7 +21,7 @@ Otherwise, you can:
 
 ### Setup the tfarm server
 
-*Note: It is recommended to run the tfarm server using a process manager like `systemd`.*
+*Note: It is recommended to run the tfarm server using a process manager like `systemd` ([example](https://github.com/cbodonnell/tfarm/blob/main/examples/systemd/tfarm.service)).*
 
 #### Configuration
 
